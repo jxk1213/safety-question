@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI申通·AI安全 - 安全知识竞答</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e27;
+      --bg-secondary: #111638;
+      --bg-card: rgba(15, 25, 60, 0.85);
+      --bg-card-hover: rgba(20, 35, 80, 0.9);
+      --accent-cyan: #00d4ff;
+      --accent-blue: #2979ff;
+      --accent-purple: #7c4dff;
+      --text-primary: #e8ecf1;
+      --text-secondary: #8892a4;
+      --success: #00e676;
+      --danger: #ff5252;
+      --warning: #ffab40;
+      --border-glow: rgba(0, 212, 255, 0.25);
+      --sidebar-width: 320px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    #app {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+    /* ===== Background Grid Effect ===== */
+    .bg-grid {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0;
+    }
+    .bg-glow {
+      position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(0,212,255,0.06) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(124,77,255,0.04) 0%, transparent 50%);
+      pointer-events: none; z-index: 0;
+      animation: bgFloat 20s ease-in-out infinite;
+    }
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-2%, 1%); }
+    }
+    /* ===== Main Area ===== */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 36px;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .main-header {
+      text-align: center;
+      padding: 8px 0 16px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .main-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .main-header .subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      letter-spacing: 3px;
+      margin-top: 4px;
+    }
+    .main-header::after {
+      content: '';
+      display: block;
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      margin: 12px auto 0;
+    }
+    /* ===== Pages ===== */
+    .page {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: pageIn 0.5s ease;
+    }
+    .page.active { display: flex; }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .page-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+    .current-team-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 20px;
+      border-radius: 20px;
+      border: 1px solid var(--border-glow);
+      background: rgba(0,212,255,0.08);
+      font-size: 14px;
+      color: var(--accent-cyan);
+      margin-bottom: 20px;
+    }
+    .current-team-badge .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    /* ===== Team Selection Page ===== */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--team-color);
+      opacity: 0.6;
+    }
+    .team-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,212,255,0.1);
+    }
+    .team-card .team-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--team-color);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    .team-card .team-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .team-card .team-score-info {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    /* ===== Type Selection Page ===== */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      max-width: 960px;
+      width: 100%;
+    }
+    .type-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .type-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0,212,255,0.15);
+    }
+    .type-card .type-icon {
+      width: 64px; height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+      border: 2px solid;
+    }
+    .type-card[data-type="judge"] .type-icon {
+      color: #4fc3f7; border-color: rgba(79,195,247,0.3);
+      background: rgba(79,195,247,0.1);
+    }
+    .type-card[data-type="single"] .type-icon {
+      color: #81c784; border-color: rgba(129,199,132,0.3);
+      background: rgba(129,199,132,0.1);
+    }
+    .type-card[data-type="multi"] .type-icon {
+      color: #ffb74d; border-color: rgba(255,183,77,0.3);
+      background: rgba(255,183,77,0.1);
+    }
+    .type-card[data-type="uncertain"] .type-icon {
+      color: #ce93d8; border-color: rgba(206,147,216,0.3);
+      background: rgba(206,147,216,0.1);
+    }
+    .type-card .type-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .type-card .type-score {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .type-card .type-remain {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .type-card.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    /* ===== Question Draw Page ===== */
+    .draw-container {
+      max-width: 880px;
+      width: 100%;
+    }
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .tile {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: default;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .tile.highlight {
+      border-color: var(--accent-cyan);
+      background: rgba(0,212,255,0.15);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 16px rgba(0,212,255,0.3);
+    }
+    .tile.selected {
+      border-color: var(--accent-cyan);
+      background: linear-gradient(135deg, rgba(0,212,255,0.25), rgba(41,121,255,0.25));
+      color: #fff;
+      box-shadow: 0 0 24px rgba(0,212,255,0.4);
+      transform: scale(1.1);
+      z-index: 2;
+      animation: tilePulse 1s ease infinite;
+    }
+    .tile.used {
+      opacity: 0.25;
+      background: rgba(255,255,255,0.02);
+      border-color: transparent;
+    }
+    @keyframes tilePulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(0,212,255,0.4); }
+      50% { box-shadow: 0 0 36px rgba(0,212,255,0.6); }
+    }
+    .btn-primary {
+      padding: 14px 48px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 2px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(41,121,255,0.3);
+    }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .btn-secondary {
+      padding: 12px 36px;
+      border: 1px solid var(--border-glow);
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-left: 12px;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,212,255,0.08);
+    }
+    /* ===== Answer Page ===== */
+    .answer-container {
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .answer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .question-type-tag {
+      padding: 4px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .timer-container {
+      position: relative;
+      width: 80px; height: 80px;
+    }
+    .timer-ring {
+      width: 80px; height: 80px;
+      transform: rotate(-90deg);
+    }
+    .timer-ring-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.06);
+      stroke-width: 4;
+    }
+    .timer-ring-progress {
+      fill: none;
+      stroke: var(--accent-cyan);
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+    }
+    .timer-ring-progress.warning { stroke: var(--warning); }
+    .timer-ring-progress.danger { stroke: var(--danger); }
+    .timer-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 26px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-text.warning { color: var(--warning); }
+    .timer-text.danger { color: var(--danger); animation: timerPulse 0.5s ease infinite; }
+    @keyframes timerPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+    }
+    .question-content {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      font-size: 18px;
+      line-height: 1.8;
+      min-height: 80px;
+    }
+    .options-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .option-item:hover {
+      border-color: var(--border-glow);
+      background: var(--bg-card-hover);
+    }
+    .option-item.selected {
+      border-color: var(--accent-cyan);
+      background: rgba(0,212,255,0.1);
+    }
+    .option-item.correct {
+      border-color: var(--success);
+      background: rgba(0,230,118,0.1);
+    }
+    .option-item.wrong {
+      border-color: var(--danger);
+      background: rgba(255,82,82,0.1);
+    }
+    .option-item .option-marker {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+    .option-item.selected .option-marker {
+      border-color: var(--accent-cyan);
+      background: var(--accent-cyan);
+      color: var(--bg-primary);
+    }
+    .option-item.correct .option-marker {
+      border-color: var(--success);
+      background: var(--success);
+      color: var(--bg-primary);
+    }
+    .option-item.wrong .option-marker {
+      border-color: var(--danger);
+      background: var(--danger);
+      color: #fff;
+    }
+    .option-item.disabled { pointer-events: none; opacity: 0.7; }
+    /* ===== Result Page ===== */
+    .result-container {
+      max-width: 860px;
+      width: 100%;
+      overflow-y: auto;
+      flex: 1;
+      padding-bottom: 20px;
+    }
+    .result-container::-webkit-scrollbar { width: 4px; }
+    .result-container::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+    .result-main {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .result-answer-box {
+      flex: 0 0 200px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .result-answer-box.correct { border-color: rgba(0,230,118,0.3); }
+    .result-answer-box.wrong { border-color: rgba(255,82,82,0.3); }
+    .result-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .result-icon.correct {
+      background: rgba(0,230,118,0.15);
+      color: var(--success);
+      border: 2px solid rgba(0,230,118,0.3);
+    }
+    .result-icon.wrong {
+      background: rgba(255,82,82,0.15);
+      color: var(--danger);
+      border: 2px solid rgba(255,82,82,0.3);
+    }
+    .result-label {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .result-score-change {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .result-question-box {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .result-question-text {
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .result-correct-answer {
+      font-size: 14px;
+      color: var(--success);
+      padding: 8px 14px;
+      background: rgba(0,230,118,0.08);
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .result-your-answer {
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-left: 8px;
+    }
+    .result-your-answer.correct { color: var(--success); background: rgba(0,230,118,0.08); }
+    .result-your-answer.wrong { color: var(--danger); background: rgba(255,82,82,0.08); }
+    .other-teams-section {
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .section-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+    .other-teams-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .other-team-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .other-team-item:hover { border-color: var(--border-glow); }
+    .other-team-item .ot-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .other-team-item .ot-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .other-team-item .ot-status {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 4px;
+    }
+    .other-team-item.ot-correct .ot-status {
+      color: var(--success);
+      background: rgba(0,230,118,0.12);
+    }
+    .other-team-item.ot-wrong .ot-status {
+      color: var(--danger);
+      background: rgba(255,82,82,0.12);
+    }
+    .other-team-item.ot-unset .ot-status {
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.05);
+    }
+    .score-breakdown {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 2;
+      display: none;
+    }
+    .score-breakdown .sb-line {
+      display: flex;
+      justify-content: space-between;
+    }
+    .score-breakdown .sb-total {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 8px;
+      margin-top: 8px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .result-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    /* ===== Sidebar ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      background: rgba(8, 12, 36, 0.95);
+      border-left: 1px solid rgba(0,212,255,0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .sidebar-title {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0,212,255,0.12);
+    }
+    .ranking-list {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+    .ranking-list::-webkit-scrollbar { width: 3px; }
+    .ranking-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid transparent;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  background 0.3s ease, border-color 0.3s ease;
+      position: relative;
+    }
+    .rank-item.active-team {
+      border-color: var(--border-glow);
+      background: rgba(0,212,255,0.06);
+    }
+    .rank-item.active-team::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 60%;
+      background: var(--accent-cyan);
+      border-radius: 0 2px 2px 0;
+    }
+    .rank-num {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .rank-num.top1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #1a1a1a; }
+    .rank-num.top2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #1a1a1a; }
+    .rank-num.top3 { background: linear-gradient(135deg, #cd7f32, #a0622e); color: #fff; }
+    .rank-num.normal { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+    .rank-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .rank-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rank-score {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-variant-numeric: tabular-nums;
+      min-width: 40px;
+      text-align: right;
+    }
+    .rank-change {
+      font-size: 11px;
+      margin-left: 4px;
+      min-width: 30px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .rank-change.show { opacity: 1; }
+    .rank-change.up { color: var(--success); }
+    .rank-change.down { color: var(--danger); }
+    .qr-section {
+      flex-shrink: 0;
+      text-align: center;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,212,255,0.1);
+      margin-top: 12px;
+    }
+    .qr-title {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .qr-placeholder {
+      width: 140px; height: 140px;
+      margin: 0 auto;
+      border: 1px dashed rgba(0,212,255,0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+      background: rgba(0,212,255,0.03);
+    }
+    .qr-placeholder canvas, .qr-placeholder img {
+      border-radius: 6px;
+    }
+    /* ===== Utility ===== */
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .hidden { display: none !important; }
+    .score-positive { color: var(--success); }
+    .score-negative { color: var(--danger); }
+    /* ===== Draw Animation Overlay ===== */
+    .draw-result-overlay {
+      position: fixed;
+      top: 0; left: 0; right: var(--sidebar-width); bottom: 0;
+      background: rgba(10,14,39,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .draw-result-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .draw-result-card {
+      text-align: center;
+      animation: drawResultIn 0.6s ease;
+    }
+    .draw-result-card .dr-num {
+      font-size: 72px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .draw-result-card .dr-label {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    @keyframes drawResultIn {
+      from { opacity: 0; transform: scale(0.6); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    /* ===== Scanline decoration ===== */
+    .main-area::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,212,255,0.008) 2px,
+        rgba(0,212,255,0.008) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+    .main-area > * { position: relative; z-index: 1; }
+    /* ===== Score Fly Animation ===== */
+    .score-fly {
+      position: fixed;
+      font-size: 24px;
+      font-weight: 800;
+      pointer-events: none;
+      z-index: 200;
+      animation: scoreFly 1.5s ease forwards;
+    }
+    @keyframes scoreFly {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+    }
+    .btn-fullscreen {
+      position: fixed;
+      top: 12px; right: calc(var(--sidebar-width) + 16px);
+      z-index: 50;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      background: rgba(10,14,39,0.8);
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+    }
+    .btn-fullscreen:hover {
+      border-color: var(--border-glow);
+      color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <main class="main-area">
+      <div class="main-header">
+        <h1>AI申通 · AI安全</h1>
+        <div class="subtitle">安全生产月知识竞答</div>
+      </div>
+
+      <!-- Page 0: Team Selection -->
+      <section id="pageTeamSelect" class="page active">
+        <div class="page-title">选择答题队伍</div>
+        <div class="page-subtitle">请选择本轮参与答题的队伍</div>
+        <div class="team-grid" id="teamGrid"></div>
+      </section>
+
+      <!-- Page 1: Type Selection -->
+      <section id="pageTypeSelect" class="page">
+        <div class="current-team-badge" id="typeBadge"></div>
+        <div class="page-title">选择题型</div>
+        <div class="page-subtitle">请选择本轮答题的题目类型</div>
+        <div class="type-grid" id="typeGrid"></div>
+        <div style="margin-top:20px">
+          <button class="btn-secondary" onclick="backToTeamSelect()">返回选择队伍</button>
+        </div>
+      </section>
+
+      <!-- Page 2: Question Draw -->
+      <section id="pageQuestionDraw" class="page">
+        <div class="current-team-badge" id="drawBadge"></div>
+        <div class="page-title" id="drawTitle">题目抽选</div>
+        <div class="page-subtitle">点击下方按钮开始抽取题目</div>
+        <div class="draw-container">
+          <div class="tile-grid" id="tileGrid"></div>
+          <div style="text-align:center; display:flex; justify-content:center; gap:12px">
+            <button class="btn-secondary" onclick="backToTypeSelect()">返回选题型</button>
+            <button class="btn-primary" id="btnDraw" onclick="startDraw()">开始抽题</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Page 3: Answer -->
+      <section id="pageAnswer" class="page">
+        <div class="answer-container">
+          <div class="answer-top">
+            <div class="current-team-badge" id="answerBadge"></div>
+            <div class="timer-container">
+              <svg class="timer-ring" viewBox="0 0 100 100">
+                <circle class="timer-ring-bg" cx="50" cy="50" r="45"/>
+                <circle class="timer-ring-progress" cx="50" cy="50" r="45"
+                  stroke-dasharray="282.7" stroke-dashoffset="0" id="timerCircle"/>
+              </svg>
+              <div class="timer-text" id="timerText">30</div>
+            </div>
+            <div class="question-type-tag" id="answerTypeTag"></div>
+          </div>
+          <div class="question-content" id="questionContent"></div>
+          <div class="options-list" id="optionsList"></div>
+          <button class="btn-primary" id="btnSubmit" onclick="submitAnswer()">提交答案</button>
+        </div>
+      </section>
+
+      <!-- Page 4: Result -->
+      <section id="pageResult" class="page">
+        <div class="result-container">
+          <div class="result-main">
+            <div class="result-answer-box" id="resultAnswerBox">
+              <div class="result-icon" id="resultIcon"></div>
+              <div class="result-label" id="resultLabel"></div>
+              <div class="result-score-change" id="resultScorePreview"></div>
+            </div>
+            <div class="result-question-box">
+              <div class="result-question-text" id="resultQuestionText"></div>
+              <span class="result-correct-answer" id="resultCorrectAnswer"></span>
+              <span class="result-your-answer" id="resultYourAnswer"></span>
+            </div>
+          </div>
+          <div class="other-teams-section">
+            <div class="section-title">其他队伍答题情况</div>
+            <div class="section-hint">点击可切换各队伍的答题结果</div>
+            <div class="other-teams-grid" id="otherTeamsGrid"></div>
+          </div>
+          <div class="score-breakdown" id="scoreBreakdown"></div>
+          <div class="result-actions">
+            <button class="btn-primary" id="btnSettle" onclick="settleScore()">确认结算</button>
+            <button class="btn-secondary hidden" id="btnNext" onclick="nextRound()">下一轮</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-title">队伍排名</div>
+      <div class="ranking-list" id="rankingList"></div>
+      <div class="qr-section">
+        <div class="qr-title">扫码参与答题</div>
+        <div class="qr-placeholder" id="qrCode">二维码区域</div>
+      </div>
+    </aside>
+
+    <button class="btn-fullscreen" onclick="toggleFullscreen()" id="btnFullscreen">全屏显示</button>
+
+    <div class="draw-result-overlay" id="drawOverlay">
+      <div class="draw-result-card">
+        <div class="dr-num" id="drawResultNum"></div>
+        <div class="dr-label">题目已抽取</div>
+        <button class="btn-primary" onclick="goToAnswer()">开始答题</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ============================================================
+   Configuration
+   ============================================================ */
+const QR_URL = 'https://example.com/quiz';
+const TIMER_SECONDS = 30;
+
+const TEAM_CONFIG = [
+  { name: '浙江省区', abbr: '浙', color: '#f06292' },
+  { name: '江苏省区', abbr: '苏', color: '#ff8a65' },
+  { name: '广东省区', abbr: '粤', color: '#ffd54f' },
+  { name: '山东省区', abbr: '鲁', color: '#81c784' },
+  { name: '河南省区', abbr: '豫', color: '#4fc3f7' },
+  { name: '四川省区', abbr: '川', color: '#b39ddb' },
+  { name: '湖北省区', abbr: '鄂', color: '#4dd0e1' },
+  { name: '北京省区', abbr: '京', color: '#a1887f' },
+  { name: '观众队',   abbr: '众', color: '#90a4ae' }
+];
+
+const TYPE_CONFIG = {
+  judge:     { name: '判断题', icon: '判', score: 5 },
+  single:    { name: '单选题', icon: '单', score: 10 },
+  multi:     { name: '多选题', icon: '多', score: 20 },
+  uncertain: { name: '不定项选择题', icon: '不', score: 30 }
+};
+
+/* ============================================================
+   Question Bank
+   ============================================================ */
+const QUESTIONS = {
+  judge: [
+    { q: '安全生产是指在生产经营活动中，为了避免造成人员伤害和财产损失的事故而采取相应的事故预防和控制措施。', answer: true },
+    { q: '任何单位和个人都有权对安全生产违法行为进行举报。', answer: true },
+    { q: '生产经营单位的从业人员有权拒绝违章指挥和强令冒险作业。', answer: true },
+    { q: '发生火灾时，应该乘坐电梯迅速逃离。', answer: false },
+    { q: '安全帽使用前应检查帽壳、帽衬、帽带是否齐全有效。', answer: true },
+    { q: '进入有限空间作业前不需要进行气体检测。', answer: false },
+    { q: '灭火器应放置在明显和便于取用的地方。', answer: true },
+    { q: '安全生产工作应当以人为本，坚持安全发展。', answer: true },
+    { q: '特种作业人员未取得特种作业操作证可以先上岗后培训。', answer: false },
+    { q: '从业人员发现直接危及人身安全的紧急情况时，有权停止作业。', answer: true },
+    { q: '电气设备着火时，应先切断电源再灭火。', answer: true },
+    { q: '安全生产许可证有效期为5年。', answer: false },
+    { q: '高处作业是指在坠落高度基准面2米及以上的作业。', answer: true },
+    { q: '氧气瓶和乙炔瓶使用时距离不得小于3米。', answer: false },
+    { q: '三级安全教育是指公司级、车间级和班组级安全教育。', answer: true },
+    { q: '发生危险化学品泄漏时，应向上风方向撤离。', answer: true },
+    { q: '快递分拣作业中可以抛掷易碎物品以提高效率。', answer: false },
+    { q: '叉车操作人员必须持有特种设备作业人员证书。', answer: true },
+    { q: '劳动防护用品可以用货币代替发放。', answer: false },
+    { q: '事故隐患排查治理制度是企业安全生产的基本制度之一。', answer: true },
+    { q: '消防通道的宽度不应小于3.5米。', answer: true },
+    { q: '在没有危险的情况下，可以不佩戴个人防护用品。', answer: false },
+    { q: '安全生产责任制是企业最基本的安全管理制度。', answer: true },
+    { q: '火灾报警电话是112。', answer: false },
+    { q: '未经安全生产教育和培训合格的从业人员，不得上岗作业。', answer: true },
+  ],
+  single: [
+    { q: '我国安全生产工作的方针是？', options: ['安全第一、预防为主、综合治理', '安全第一、以人为本', '预防为主、防消结合', '安全发展、预防为主'], answer: 0 },
+    { q: '发生火灾时，正确的逃生方法是？', options: ['乘坐电梯逃离', '用湿毛巾捂住口鼻，低姿撤离', '跳楼逃生', '躲在角落等待'], answer: 1 },
+    { q: '灭火器的使用距离一般为？', options: ['1米', '2-3米', '5米', '10米'], answer: 1 },
+    { q: '下列哪项属于特种作业？', options: ['普通搬运', '电工作业', '办公室文员', '保洁工作'], answer: 1 },
+    { q: '高处作业的定义中，坠落高度基准面的高度是？', options: ['1米及以上', '2米及以上', '3米及以上', '5米及以上'], answer: 1 },
+    { q: '安全色中红色代表什么含义？', options: ['指令、必须遵守', '禁止、停止、危险', '警告、注意', '安全、通行'], answer: 1 },
+    { q: '安全色中黄色代表什么含义？', options: ['禁止', '指令', '警告、注意', '安全'], answer: 2 },
+    { q: '新员工入职安全培训时间不得少于多少学时？', options: ['8学时', '16学时', '24学时', '48学时'], answer: 2 },
+    { q: '以下哪种气体是无色无味的有毒气体？', options: ['氯气', '氨气', '一氧化碳', '二氧化硫'], answer: 2 },
+    { q: '触电急救的第一步是？', options: ['进行心肺复苏', '拨打120', '立即使触电者脱离电源', '进行人工呼吸'], answer: 2 },
+    { q: '干粉灭火器适用于扑灭哪类火灾？', options: ['仅固体火灾', '仅液体火灾', '仅气体火灾', '固体、液体、气体火灾'], answer: 3 },
+    { q: '消防安全"四个能力"不包括下列哪项？', options: ['检查消除火灾隐患能力', '扑救初起火灾能力', '组织疏散逃生能力', '维修消防设备能力'], answer: 3 },
+    { q: '安全生产法规定，从业人员超过多少人的应当设置安全生产管理机构？', options: ['50人', '100人', '200人', '300人'], answer: 1 },
+    { q: '物流仓储场所每个灭火器设置点的灭火器不宜多于？', options: ['3具', '5具', '7具', '10具'], answer: 1 },
+    { q: '以下哪项是正确的安全帽佩戴方式？', options: ['帽带系紧在下颌处', '帽带不系', '帽子歪戴', '在安全帽上打孔透气'], answer: 0 },
+    { q: '我国《安全生产法》最新一次修订是哪一年？', options: ['2014年', '2018年', '2021年', '2023年'], answer: 2 },
+    { q: '工伤保险遵循的原则是？', options: ['无过失补偿原则', '过错责任原则', '公平原则', '等价有偿原则'], answer: 0 },
+    { q: '企业安全生产标准化分为几个等级？', options: ['二级', '三级', '四级', '五级'], answer: 1 },
+    { q: '安全生产"三同时"不包括以下哪项？', options: ['同时设计', '同时施工', '同时投入生产和使用', '同时验收'], answer: 3 },
+    { q: '火灾报警电话是？', options: ['110', '119', '120', '122'], answer: 1 },
+    { q: '安全色中绿色代表什么含义？', options: ['禁止', '警告', '指令', '安全、通行'], answer: 3 },
+    { q: '下列哪种灭火器不能用于扑灭电器火灾？', options: ['干粉灭火器', '二氧化碳灭火器', '泡沫灭火器', '七氟丙烷灭火器'], answer: 2 },
+    { q: '快递运输车辆装载货物时，超高不得超过车厢高度的？', options: ['1/4', '1/3', '不得超出', '1/2'], answer: 2 },
+    { q: '生产安全事故按等级分类，一般事故是指造成多少人以下死亡的事故？', options: ['1人', '3人', '5人', '10人'], answer: 1 },
+    { q: '在密闭空间内作业，氧气浓度应保持在多少范围？', options: ['16%-18%', '19.5%-23.5%', '25%-28%', '15%-20%'], answer: 1 },
+  ],
+  multi: [
+    { q: '安全生产"三违"是指？', options: ['违章指挥', '违章作业', '违反法律', '违反劳动纪律'], answer: [0, 1, 3] },
+    { q: '火灾逃生时应注意哪些事项？', options: ['低姿行走', '用湿布捂住口鼻', '不乘坐电梯', '收拾贵重物品后逃离'], answer: [0, 1, 2] },
+    { q: '以下哪些属于安全生产中的"四不放过"原则？', options: ['事故原因不查清不放过', '责任人员未处理不放过', '整改措施未落实不放过', '有关人员未受到教育不放过'], answer: [0, 1, 2, 3] },
+    { q: '高处作业时必须佩戴哪些防护用品？', options: ['安全帽', '安全带', '防滑鞋', '太阳镜'], answer: [0, 1, 2] },
+    { q: '以下哪些是常见的职业病危害因素？', options: ['粉尘', '噪声', '高温', '正常照明'], answer: [0, 1, 2] },
+    { q: '触电事故的急救措施包括？', options: ['使触电者脱离电源', '拨打急救电话', '必要时进行心肺复苏', '用金属工具挑开电线'], answer: [0, 1, 2] },
+    { q: '安全生产管理的基本原则包括？', options: ['管生产必须管安全', '安全具有否决权', '利润第一', '全员参与'], answer: [0, 1, 3] },
+    { q: '消防安全检查的内容包括？', options: ['消防通道是否畅通', '消防设施是否完好', '员工是否掌握消防知识', '装修是否豪华'], answer: [0, 1, 2] },
+    { q: '仓库防火安全管理要求包括？', options: ['配备消防器材', '保持通道畅通', '禁止吸烟', '可以使用明火取暖'], answer: [0, 1, 2] },
+    { q: '快递物流企业应急预案应包括？', options: ['火灾应急预案', '危险品泄漏应急预案', '自然灾害应急预案', '交通事故应急预案'], answer: [0, 1, 2, 3] },
+    { q: '安全培训的形式包括？', options: ['三级安全教育', '专项安全培训', '安全活动日', '应急演练'], answer: [0, 1, 2, 3] },
+    { q: '以下哪些是密闭空间作业前必须做的？', options: ['通风换气', '气体检测', '安排监护人', '直接进入作业'], answer: [0, 1, 2] },
+    { q: '危险化学品的储存要求包括？', options: ['分类存放', '标识清楚', '远离火源', '随意堆放'], answer: [0, 1, 2] },
+    { q: '安全标志分为哪几类？', options: ['禁止标志', '警告标志', '指令标志', '提示标志'], answer: [0, 1, 2, 3] },
+    { q: '叉车作业安全要求包括？', options: ['持证上岗', '不超载', '作业时不载人', '可以快速转弯'], answer: [0, 1, 2] },
+    { q: '电气安全的基本措施包括？', options: ['绝缘', '接地', '漏电保护', '赤手操作'], answer: [0, 1, 2] },
+    { q: '事故调查报告应包括的内容有？', options: ['事故经过', '事故原因', '整改措施', '责任追究'], answer: [0, 1, 2, 3] },
+    { q: '物流运输安全管理包括？', options: ['车辆安全检查', '驾驶员资质管理', '货物装载规范', '超速行驶'], answer: [0, 1, 2] },
+    { q: '劳动者在安全生产中的权利包括？', options: ['知情权', '拒绝权', '紧急撤离权', '获得赔偿权'], answer: [0, 1, 2, 3] },
+    { q: '下列哪些属于个人防护用品？', options: ['安全帽', '防护手套', '护目镜', '普通休闲服'], answer: [0, 1, 2] },
+  ],
+  uncertain: [
+    { q: '以下关于安全生产责任制说法正确的是？', options: ['是安全生产管理制度的核心', '明确各级各类人员的安全职责', '只需要管理层负责', '是企业最基本的安全管理制度'], answer: [0, 1, 3] },
+    { q: '快递分拣中心的安全隐患主要有？', options: ['机械伤害', '物体打击', '火灾', '以上都不是'], answer: [0, 1, 2] },
+    { q: '以下哪种情况下应立即停止作业？', options: ['发现重大安全隐患', '恶劣天气突变', '设备出现异常', '临近下班时间'], answer: [0, 1, 2] },
+    { q: '关于安全帽的使用，正确的是？', options: ['使用前检查完好性', '不能随意改造', '超过使用期限应更换', '可以当凳子坐'], answer: [0, 1, 2] },
+    { q: '关于应急预案演练，正确的说法是？', options: ['应定期进行', '应有评估和总结', '全员应参与', '一次演练即可不再进行'], answer: [0, 1, 2] },
+    { q: '以下哪些行为属于违章作业？', options: ['未佩戴防护用品作业', '酒后上岗', '擅自拆除安全装置', '按操作规程作业'], answer: [0, 1, 2] },
+    { q: '安全生产"五要素"包括？', options: ['安全文化', '安全法制', '安全责任', '安全投入'], answer: [0, 1, 2, 3] },
+    { q: '危险源辨识的方法有？', options: ['安全检查表法', '工作危害分析法', '预先危险分析法', '凭空想象法'], answer: [0, 1, 2] },
+    { q: '以下关于安全距离的说法正确的是？', options: ['高压线附近作业需保持安全距离', '叉车行驶应与行人保持安全距离', '堆放物品应与墙壁保持安全距离', '安全距离没有具体标准'], answer: [0, 1, 2] },
+    { q: '物流企业安全管理包括？', options: ['车辆安全管理', '仓储安全管理', '人员安全培训', '消防安全管理'], answer: [0, 1, 2, 3] },
+    { q: '下列关于电气安全说法正确的是？', options: ['湿手不能触摸电器开关', '电气线路老化应及时更换', '可以私自乱接电线', '发现电气故障应及时报修'], answer: [0, 1, 3] },
+    { q: '以下哪些属于重大危险源？', options: ['大量储存易燃易爆物质', '大量储存有毒有害物质', '高压输气管道', '普通办公楼'], answer: [0, 1, 2] },
+    { q: '安全生产教育培训应包括？', options: ['安全生产法律法规', '安全操作规程', '应急救援知识', '事故案例警示'], answer: [0, 1, 2, 3] },
+    { q: '建设项目安全设施"三同时"是指安全设施必须与主体工程同时？', options: ['设计', '施工', '投入生产和使用', '竣工验收'], answer: [0, 1, 2] },
+    { q: '以下关于消防通道的说法正确的是？', options: ['必须保持畅通', '不得堆放物品', '宽度不应小于规定标准', '仅在检查时保持畅通即可'], answer: [0, 1, 2] },
+    { q: '快递末端配送安全注意事项包括？', options: ['遵守交通规则', '不逆行不闯红灯', '佩戴安全头盔', '为赶时间可以超速'], answer: [0, 1, 2] },
+    { q: '以下哪些场所应配置应急照明？', options: ['疏散通道', '安全出口', '消防控制室', '普通仓库过道'], answer: [0, 1, 2] },
+    { q: '安全生产"一岗双责"是指？', options: ['党政同责', '一个岗位既要管业务也要管安全', '只管生产不管安全', '安全与业务融合'], answer: [0, 1, 3] },
+    { q: '以下哪些情形应进行安全生产检查？', options: ['定期检查', '专项检查', '季节性检查', '节假日前检查'], answer: [0, 1, 2, 3] },
+    { q: '仓库堆放货物的安全要求包括？', options: ['堆放整齐稳固', '留有安全通道', '不超过限定高度', '越高越好以节省空间'], answer: [0, 1, 2] },
+  ]
+};
+
+/* ============================================================
+   State
+   ============================================================ */
+const state = {
+  currentPage: 'teamSelect',
+  currentTeamIdx: -1,
+  currentType: null,
+  currentQuestion: null,
+  selectedOptions: [],
+  timeLeft: TIMER_SECONDS,
+  timerInterval: null,
+  isSubmitted: false,
+  teams: TEAM_CONFIG.map((t, i) => ({ ...t, id: i, score: 0 })),
+  usedQuestions: { judge: new Set(), single: new Set(), multi: new Set(), uncertain: new Set() },
+  usedTiles: { judge: new Set(), single: new Set(), multi: new Set(), uncertain: new Set() },
+  otherTeamResults: {},
+  drawSelectedTile: -1,
+  settled: false
+};
+
+/* ============================================================
+   DOM Helpers
+   ============================================================ */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+
+function showPage(name) {
+  $$('.page').forEach(p => p.classList.remove('active'));
+  const map = {
+    teamSelect: 'pageTeamSelect',
+    typeSelect: 'pageTypeSelect',
+    questionDraw: 'pageQuestionDraw',
+    answer: 'pageAnswer',
+    result: 'pageResult'
+  };
+  $(`#${map[name]}`).classList.add('active');
+  state.currentPage = name;
+}
+
+function makeTeamBadge(teamIdx) {
+  const t = state.teams[teamIdx];
+  return `<span class="dot" style="background:${t.color}"></span> 当前答题：${t.name}`;
+}
+
+/* ============================================================
+   Team Selection (Page 0)
+   ============================================================ */
+function renderTeamGrid() {
+  const grid = $('#teamGrid');
+  grid.innerHTML = state.teams.slice(0, 8).map((t, i) => `
+    <div class="team-card" style="--team-color:${t.color}" onclick="selectTeam(${i})">
+      <div class="team-avatar" style="background:${t.color}">${t.abbr}</div>
+      <div class="team-name">${t.name}</div>
+      <div class="team-score-info">${t.score} 分</div>
+    </div>
+  `).join('');
+}
+
+function selectTeam(idx) {
+  state.currentTeamIdx = idx;
+  state.selectedOptions = [];
+  state.isSubmitted = false;
+  state.settled = false;
+  renderTypeGrid();
+  renderRanking();
+  showPage('typeSelect');
+}
+
+/* ============================================================
+   Type Selection (Page 1)
+   ============================================================ */
+function renderTypeGrid() {
+  const badge = $('#typeBadge');
+  badge.innerHTML = makeTeamBadge(state.currentTeamIdx);
+
+  const grid = $('#typeGrid');
+  const types = ['judge', 'single', 'multi', 'uncertain'];
+  grid.innerHTML = types.map(type => {
+    const cfg = TYPE_CONFIG[type];
+    const pool = QUESTIONS[type];
+    const remain = pool.length - state.usedQuestions[type].size;
+    const disabled = remain <= 0 ? 'disabled' : '';
+    return `
+      <div class="type-card ${disabled}" data-type="${type}" onclick="selectType('${type}')">
+        <div class="type-icon">${cfg.icon}</div>
+        <div class="type-name">${cfg.name}</div>
+        <div class="type-score">${cfg.score}分</div>
+        <div class="type-remain">剩余 ${remain} 题</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectType(type) {
+  state.currentType = type;
+  state.drawSelectedTile = -1;
+  renderDrawPage();
+  showPage('questionDraw');
+}
+
+/* ============================================================
+   Question Draw (Page 2)
+   ============================================================ */
+function renderDrawPage() {
+  $('#drawBadge').innerHTML = makeTeamBadge(state.currentTeamIdx);
+  $('#drawTitle').textContent = `题目抽选 - ${TYPE_CONFIG[state.currentType].name}`;
+  $('#btnDraw').disabled = false;
+  $('#btnDraw').textContent = '开始抽题';
+
+  const grid = $('#tileGrid');
+  const total = 50;
+  const usedTiles = state.usedTiles[state.currentType];
+  let html = '';
+  for (let i = 1; i <= total; i++) {
+    const usedClass = usedTiles.has(i) ? 'used' : '';
+    html += `<div class="tile ${usedClass}" id="tile-${i}">${i}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function startDraw() {
+  const btn = $('#btnDraw');
+  btn.disabled = true;
+  btn.textContent = '抽取中...';
+
+  const usedTiles = state.usedTiles[state.currentType];
+  const availableTiles = [];
+  for (let i = 1; i <= 50; i++) {
+    if (!usedTiles.has(i)) availableTiles.push(i);
+  }
+  if (availableTiles.length === 0) return;
+
+  const targetTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
+  let step = 0;
+  const totalSteps = 40 + Math.floor(Math.random() * 15);
+  let currentHighlight = -1;
+
+  function animate() {
+    if (currentHighlight > 0) {
+      const el = $(`#tile-${currentHighlight}`);
+      if (el) el.classList.remove('highlight');
+    }
+
+    if (step >= totalSteps) {
+      const finalEl = $(`#tile-${targetTile}`);
+      if (finalEl) {
+        finalEl.classList.add('selected');
+      }
+      state.drawSelectedTile = targetTile;
+      setTimeout(() => showDrawResult(targetTile), 600);
+      return;
+    }
+
+    const next = step >= totalSteps - 5 ? targetTile : availableTiles[Math.floor(Math.random() * availableTiles.length)];
+    const el = $(`#tile-${next}`);
+    if (el) el.classList.add('highlight');
+    currentHighlight = next;
+
+    step++;
+    const baseDelay = 50;
+    const progress = step / totalSteps;
+    const delay = baseDelay + progress * progress * 200;
+    setTimeout(animate, delay);
+  }
+
+  animate();
+}
+
+function showDrawResult(tileNum) {
+  $('#drawResultNum').textContent = `第 ${tileNum} 题`;
+  $('#drawOverlay').classList.add('show');
+
+  const type = state.currentType;
+  const pool = QUESTIONS[type];
+  const usedQ = state.usedQuestions[type];
+  const availableIdx = [];
+  for (let i = 0; i < pool.length; i++) {
+    if (!usedQ.has(i)) availableIdx.push(i);
+  }
+  const qIdx = availableIdx[Math.floor(Math.random() * availableIdx.length)];
+  state.currentQuestion = { ...pool[qIdx], _idx: qIdx };
+  state.usedQuestions[type].add(qIdx);
+  state.usedTiles[type].add(tileNum);
+}
+
+function goToAnswer() {
+  $('#drawOverlay').classList.remove('show');
+  renderAnswerPage();
+  showPage('answer');
+  startTimer();
+}
+
+/* ============================================================
+   Answer Page (Page 3)
+   ============================================================ */
+function renderAnswerPage() {
+  const type = state.currentType;
+  const cfg = TYPE_CONFIG[type];
+  const q = state.currentQuestion;
+
+  $('#answerBadge').innerHTML = makeTeamBadge(state.currentTeamIdx);
+
+  const tag = $('#answerTypeTag');
+  tag.textContent = `${cfg.name} · ${cfg.score}分`;
+  const typeColors = { judge: '#4fc3f7', single: '#81c784', multi: '#ffb74d', uncertain: '#ce93d8' };
+  const tc = typeColors[type] || '#4fc3f7';
+  tag.style.background = `${tc}18`;
+  tag.style.color = tc;
+  tag.style.border = `1px solid ${tc}40`;
+
+  $('#questionContent').textContent = q.q;
+
+  state.selectedOptions = [];
+  state.isSubmitted = false;
+  $('#btnSubmit').disabled = false;
+  $('#btnSubmit').textContent = '提交答案';
+
+  const list = $('#optionsList');
+  if (type === 'judge') {
+    list.innerHTML = ['正确', '错误'].map((text, i) => `
+      <div class="option-item" onclick="toggleOption(${i})" id="opt-${i}">
+        <div class="option-marker">${String.fromCharCode(65 + i)}</div>
+        <span>${text}</span>
+      </div>
+    `).join('');
+  } else {
+    const labels = ['A', 'B', 'C', 'D'];
+    list.innerHTML = q.options.map((text, i) => `
+      <div class="option-item" onclick="toggleOption(${i})" id="opt-${i}">
+        <div class="option-marker">${labels[i]}</div>
+        <span>${text}</span>
+      </div>
+    `).join('');
+  }
+
+  resetTimer();
+}
+
+function toggleOption(idx) {
+  if (state.isSubmitted) return;
+  const type = state.currentType;
+  if (type === 'judge' || type === 'single') {
+    state.selectedOptions = [idx];
+  } else {
+    const pos = state.selectedOptions.indexOf(idx);
+    if (pos >= 0) state.selectedOptions.splice(pos, 1);
+    else state.selectedOptions.push(idx);
+  }
+  updateOptionUI();
+}
+
+function updateOptionUI() {
+  const optCount = state.currentType === 'judge' ? 2 : state.currentQuestion.options.length;
+  for (let i = 0; i < optCount; i++) {
+    const el = $(`#opt-${i}`);
+    if (el) {
+      el.classList.toggle('selected', state.selectedOptions.includes(i));
+    }
+  }
+}
+
+/* ============================================================
+   Timer
+   ============================================================ */
+function resetTimer() {
+  state.timeLeft = TIMER_SECONDS;
+  updateTimerUI();
+}
+
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timeLeft = TIMER_SECONDS;
+  updateTimerUI();
+  state.timerInterval = setInterval(() => {
+    state.timeLeft--;
+    updateTimerUI();
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timerInterval);
+      if (!state.isSubmitted) submitAnswer();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const t = state.timeLeft;
+  const total = TIMER_SECONDS;
+  const circumference = 2 * Math.PI * 45;
+  const offset = circumference * (1 - t / total);
+
+  const circle = $('#timerCircle');
+  circle.setAttribute('stroke-dashoffset', offset);
+  circle.classList.remove('warning', 'danger');
+
+  const text = $('#timerText');
+  text.textContent = t;
+  text.classList.remove('warning', 'danger');
+
+  if (t <= 5) {
+    circle.classList.add('danger');
+    text.classList.add('danger');
+  } else if (t <= 10) {
+    circle.classList.add('warning');
+    text.classList.add('warning');
+  }
+}
+
+/* ============================================================
+   Submit Answer
+   ============================================================ */
+function submitAnswer() {
+  if (state.isSubmitted) return;
+  state.isSubmitted = true;
+  clearInterval(state.timerInterval);
+
+  $('#btnSubmit').disabled = true;
+  $('#btnSubmit').textContent = '已提交';
+
+  showAnswerFeedback();
+  setTimeout(() => {
+    renderResultPage();
+    showPage('result');
+  }, 1500);
+}
+
+function showAnswerFeedback() {
+  const q = state.currentQuestion;
+  const type = state.currentType;
+  let correctSet;
+  if (type === 'judge') {
+    correctSet = q.answer === true ? [0] : [1];
+  } else if (type === 'single') {
+    correctSet = [q.answer];
+  } else {
+    correctSet = [...q.answer];
+  }
+
+  const optCount = type === 'judge' ? 2 : q.options.length;
+  for (let i = 0; i < optCount; i++) {
+    const el = $(`#opt-${i}`);
+    if (!el) continue;
+    el.classList.add('disabled');
+    el.classList.remove('selected');
+    if (correctSet.includes(i)) {
+      el.classList.add('correct');
+    }
+    if (state.selectedOptions.includes(i) && !correctSet.includes(i)) {
+      el.classList.add('wrong');
+    }
+  }
+}
+
+/* ============================================================
+   Result Page (Page 4)
+   ============================================================ */
+function renderResultPage() {
+  const q = state.currentQuestion;
+  const type = state.currentType;
+  const cfg = TYPE_CONFIG[type];
+  const isCorrect = checkCorrect();
+
+  const box = $('#resultAnswerBox');
+  box.className = `result-answer-box ${isCorrect ? 'correct' : 'wrong'}`;
+
+  const icon = $('#resultIcon');
+  icon.className = `result-icon ${isCorrect ? 'correct' : 'wrong'}`;
+  icon.innerHTML = isCorrect
+    ? '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>'
+    : '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+
+  $('#resultLabel').textContent = isCorrect ? '回答正确' : '回答错误';
+  $('#resultScorePreview').textContent = `基础分：${isCorrect ? '+' : '-'}${cfg.score}分`;
+
+  $('#resultQuestionText').textContent = q.q;
+
+  let correctStr;
+  if (type === 'judge') {
+    correctStr = q.answer ? '正确' : '错误';
+  } else if (type === 'single') {
+    correctStr = String.fromCharCode(65 + q.answer);
+  } else {
+    correctStr = q.answer.map(i => String.fromCharCode(65 + i)).join('');
+  }
+  $('#resultCorrectAnswer').textContent = `正确答案：${correctStr}`;
+
+  let yourStr;
+  if (state.selectedOptions.length === 0) {
+    yourStr = '未作答';
+  } else if (type === 'judge') {
+    yourStr = state.selectedOptions[0] === 0 ? '正确' : '错误';
+  } else {
+    yourStr = state.selectedOptions.sort().map(i => String.fromCharCode(65 + i)).join('');
+  }
+  const yourEl = $('#resultYourAnswer');
+  yourEl.textContent = `你的答案：${yourStr}`;
+  yourEl.className = `result-your-answer ${isCorrect ? 'correct' : 'wrong'}`;
+
+  state.otherTeamResults = {};
+  const grid = $('#otherTeamsGrid');
+  const otherTeams = state.teams.filter((_, i) => i !== state.currentTeamIdx);
+  grid.innerHTML = otherTeams.map(t => `
+    <div class="other-team-item ot-unset" id="ot-${t.id}" onclick="toggleOtherTeam(${t.id})">
+      <span class="ot-dot" style="background:${t.color}"></span>
+      <span class="ot-name">${t.name}</span>
+      <span class="ot-status">未设置</span>
+    </div>
+  `).join('');
+
+  $('#scoreBreakdown').style.display = 'none';
+  $('#btnSettle').classList.remove('hidden');
+  $('#btnNext').classList.add('hidden');
+  state.settled = false;
+}
+
+function checkCorrect() {
+  const q = state.currentQuestion;
+  const type = state.currentType;
+  const sel = [...state.selectedOptions].sort();
+
+  if (type === 'judge') {
+    const correctIdx = q.answer ? 0 : 1;
+    return sel.length === 1 && sel[0] === correctIdx;
+  }
+  if (type === 'single') {
+    return sel.length === 1 && sel[0] === q.answer;
+  }
+  const correct = [...q.answer].sort();
+  return sel.length === correct.length && sel.every((v, i) => v === correct[i]);
+}
+
+function toggleOtherTeam(teamId) {
+  if (state.settled) return;
+  const current = state.otherTeamResults[teamId];
+  if (current === undefined) {
+    state.otherTeamResults[teamId] = true;
+  } else if (current === true) {
+    state.otherTeamResults[teamId] = false;
+  } else {
+    state.otherTeamResults[teamId] = undefined;
+    delete state.otherTeamResults[teamId];
+  }
+
+  const el = $(`#ot-${teamId}`);
+  if (!el) return;
+  el.classList.remove('ot-correct', 'ot-wrong', 'ot-unset');
+  const status = el.querySelector('.ot-status');
+  const val = state.otherTeamResults[teamId];
+  if (val === true) {
+    el.classList.add('ot-correct');
+    status.textContent = '答对';
+  } else if (val === false) {
+    el.classList.add('ot-wrong');
+    status.textContent = '答错';
+  } else {
+    el.classList.add('ot-unset');
+    status.textContent = '未设置';
+  }
+}
+
+/* ============================================================
+   Score Settlement
+   ============================================================ */
+function settleScore() {
+  if (state.settled) return;
+  state.settled = true;
+
+  const isCorrect = checkCorrect();
+  const type = state.currentType;
+  const baseScore = TYPE_CONFIG[type].score;
+  const otherTeams = state.teams.filter((_, i) => i !== state.currentTeamIdx);
+
+  let otherCorrect = 0;
+  let otherWrong = 0;
+  let otherUnset = 0;
+
+  otherTeams.forEach(t => {
+    const result = state.otherTeamResults[t.id];
+    if (result === true) otherCorrect++;
+    else if (result === false) otherWrong++;
+    else otherUnset++;
+  });
+
+  let scoreChange;
+  let breakdownHtml = '';
+  if (isCorrect) {
+    const bonus = otherWrong * 10;
+    scoreChange = baseScore + bonus;
+    breakdownHtml = `
+      <div class="sb-line"><span>基础得分</span><span class="score-positive">+${baseScore}分</span></div>
+      <div class="sb-line"><span>其他队伍答错 ${otherWrong} 支，额外加分</span><span class="score-positive">+${bonus}分</span></div>
+      ${otherUnset > 0 ? `<div class="sb-line"><span style="color:var(--text-secondary)">未设置队伍：${otherUnset} 支（不计入计算）</span><span></span></div>` : ''}
+      <div class="sb-line sb-total"><span>本轮得分</span><span class="score-positive">+${scoreChange}分</span></div>
+    `;
+  } else {
+    const penalty = otherCorrect * 10;
+    scoreChange = -(baseScore + penalty);
+    breakdownHtml = `
+      <div class="sb-line"><span>基础扣分</span><span class="score-negative">-${baseScore}分</span></div>
+      <div class="sb-line"><span>其他队伍答对 ${otherCorrect} 支，额外扣分</span><span class="score-negative">-${penalty}分</span></div>
+      ${otherUnset > 0 ? `<div class="sb-line"><span style="color:var(--text-secondary)">未设置队伍：${otherUnset} 支（不计入计算）</span><span></span></div>` : ''}
+      <div class="sb-line sb-total"><span>本轮得分</span><span class="score-negative">${scoreChange}分</span></div>
+    `;
+  }
+
+  const bd = $('#scoreBreakdown');
+  bd.innerHTML = breakdownHtml;
+  bd.style.display = 'block';
+
+  state.teams[state.currentTeamIdx].score += scoreChange;
+
+  $('#resultScorePreview').textContent = `本轮：${scoreChange >= 0 ? '+' : ''}${scoreChange}分`;
+  $('#resultScorePreview').className = `result-score-change ${scoreChange >= 0 ? 'score-positive' : 'score-negative'}`;
+
+  $('#btnSettle').classList.add('hidden');
+  $('#btnNext').classList.remove('hidden');
+
+  animateRankingUpdate();
+}
+
+/* ============================================================
+   Next Round
+   ============================================================ */
+function nextRound() {
+  renderTeamGrid();
+  renderRanking();
+  showPage('teamSelect');
+}
+
+function backToTeamSelect() {
+  state.currentTeamIdx = -1;
+  renderTeamGrid();
+  renderRanking();
+  showPage('teamSelect');
+}
+
+function backToTypeSelect() {
+  renderTypeGrid();
+  showPage('typeSelect');
+}
+
+/* ============================================================
+   Sidebar Ranking
+   ============================================================ */
+function renderRanking() {
+  const sorted = [...state.teams].sort((a, b) => b.score - a.score);
+  const list = $('#rankingList');
+  list.innerHTML = sorted.map((t, i) => {
+    const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : 'normal';
+    const activeClass = t.id === state.currentTeamIdx ? 'active-team' : '';
+    return `
+      <div class="rank-item ${activeClass}" data-team-id="${t.id}" style="order:${i}">
+        <div class="rank-num ${rankClass}">${i + 1}</div>
+        <div class="rank-avatar" style="background:${t.color}">${t.abbr}</div>
+        <div class="rank-name">${t.name}</div>
+        <div class="rank-score">${t.score}</div>
+        <div class="rank-change"></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function animateRankingUpdate() {
+  const list = $('#rankingList');
+  const items = list.querySelectorAll('.rank-item');
+  const oldPositions = {};
+  items.forEach(item => {
+    const id = parseInt(item.dataset.teamId);
+    oldPositions[id] = item.getBoundingClientRect();
+  });
+
+  const oldRanks = {};
+  items.forEach((item, i) => {
+    oldRanks[parseInt(item.dataset.teamId)] = i;
+  });
+
+  renderRanking();
+
+  const newItems = list.querySelectorAll('.rank-item');
+  const newRanks = {};
+  newItems.forEach((item, i) => {
+    newRanks[parseInt(item.dataset.teamId)] = i;
+  });
+
+  newItems.forEach(item => {
+    const id = parseInt(item.dataset.teamId);
+    const oldRect = oldPositions[id];
+    if (!oldRect) return;
+    const newRect = item.getBoundingClientRect();
+    const deltaY = oldRect.top - newRect.top;
+    if (Math.abs(deltaY) > 1) {
+      item.style.transform = `translateY(${deltaY}px)`;
+      item.style.transition = 'none';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          item.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          item.style.transform = 'translateY(0)';
+        });
+      });
+    }
+
+    const oldRank = oldRanks[id];
+    const newRank = newRanks[id];
+    const change = item.querySelector('.rank-change');
+    if (oldRank !== undefined && newRank !== undefined && oldRank !== newRank) {
+      const diff = oldRank - newRank;
+      change.textContent = diff > 0 ? `+${diff}` : `${diff}`;
+      change.className = `rank-change show ${diff > 0 ? 'up' : 'down'}`;
+      setTimeout(() => { change.classList.remove('show'); }, 3000);
+    }
+  });
+}
+
+/* ============================================================
+   QR Code
+   ============================================================ */
+function initQRCode() {
+  const container = $('#qrCode');
+  try {
+    if (typeof QRCode !== 'undefined') {
+      container.innerHTML = '';
+      new QRCode(container, {
+        text: QR_URL,
+        width: 128,
+        height: 128,
+        colorDark: '#e8ecf1',
+        colorLight: '#0a0e27',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+  } catch (e) {
+    container.textContent = '二维码区域';
+  }
+}
+
+/* ============================================================
+   Initialize
+   ============================================================ */
+function init() {
+  renderTeamGrid();
+  renderRanking();
+  initQRCode();
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    $('#btnFullscreen').textContent = '退出全屏';
+  } else {
+    document.exitFullscreen();
+    $('#btnFullscreen').textContent = '全屏显示';
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  $('#btnFullscreen').textContent = document.fullscreenElement ? '退出全屏' : '全屏显示';
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" async
+  onload="initQRCode()" onerror="console.log('QRCode library not available')"></script>
+</body>
+</html>
