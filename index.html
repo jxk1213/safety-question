@@ -26,7 +26,7 @@
       --danger: #ff5252;
       --warning: #ffab40;
       --border-glow: rgba(0, 229, 255, 0.2);
-      --sidebar-width: 25vw;
+      --sidebar-width: max(168px, calc(100vw / 6));
       --glow-cyan: 0 0 20px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.05);
       --glow-cyan-strong: 0 0 15px rgba(0,229,255,0.3), 0 0 45px rgba(0,229,255,0.1), 0 0 80px rgba(0,229,255,0.05);
     }
@@ -143,9 +143,10 @@
     /* ===== Main Area ===== */
     .main-area {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      padding: 20px 48px;
+      padding: 20px 28px 20px 36px;
       position: relative;
       z-index: 1;
       overflow: hidden;
@@ -180,24 +181,9 @@
       margin-top: 10px;
       text-transform: uppercase;
     }
-    .main-header::after {
-      content: '';
-      display: block;
-      width: 360px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-magenta), var(--accent-cyan), transparent);
-      margin: 18px auto 0;
-      opacity: 0.6;
-    }
+    .main-header::after,
     .main-header::before {
-      content: '';
-      display: block;
-      position: absolute;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 120px; height: 1px;
-      background: var(--accent-cyan);
-      box-shadow: 0 0 20px 5px rgba(0,229,255,0.15);
+      display: none;
     }
 
     /* ===== Glass Card Mixin ===== */
@@ -322,96 +308,278 @@
       box-shadow: 0 0 8px currentColor;
     }
 
-    /* ===== Team Selection Page ===== */
+    /* ===== Team Selection Page (Slanted Frame Design) ===== */
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 14px;
       max-width: 100%;
       width: 100%;
+      margin: 0 auto;
+      padding: 10px 0 20px;
+    }
+    /* 首页：单行卡片铺满主区域高度与宽度 */
+    #pageTeamSelect.page {
+      justify-content: flex-start;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+    }
+    #pageTeamSelect .team-grid {
+      flex: 1;
+      min-height: 0;
+      grid-template-rows: 1fr;
+      gap: clamp(8px, 1vw, 14px);
+      padding: 6px 0 12px;
+      align-items: stretch;
+    }
+    #pageTeamSelect .team-card {
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    #pageTeamSelect .team-card-frame {
+      flex: 1;
+      min-height: 0;
+      aspect-ratio: unset;
+      height: auto;
+    }
+    #pageTeamSelect .team-card-frame-content {
+      padding: clamp(14px, 2.2vmin, 28px) clamp(8px, 1.2vmin, 14px);
+    }
+    #pageTeamSelect .team-card-abbr {
+      font-size: clamp(18px, 2.4vmin, 36px);
+    }
+    #pageTeamSelect .team-card-subtitle {
+      font-size: clamp(10px, 1.35vmin, 15px);
+    }
+    #pageTeamSelect .team-card-zone--emblem .team-card-logo {
+      width: min(80cqmin, 100%);
+      height: min(80cqmin, 100%);
+      font-size: clamp(16px, 24cqmin, 40px);
+    }
+    #pageTeamSelect .team-card-zone--flag .team-card-map-container {
+      width: min(94cqmin, 100%);
+      height: min(94cqmin, 100%);
+    }
+    #pageTeamSelect .frame-corner {
+      width: clamp(12px, 1.4vmin, 16px);
+      height: clamp(12px, 1.4vmin, 16px);
     }
     .team-card {
-      background: var(--bg-glass);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 14px;
-      padding: 28px 16px;
-      text-align: center;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .team-card:hover {
+      transform: translateY(-12px);
+      z-index: 2;
+    }
+
+    .team-card-frame {
+      width: 100%;
+      aspect-ratio: 2/5;
+      background: linear-gradient(180deg, rgba(10, 20, 60, 0.6) 0%, rgba(5, 12, 40, 0.8) 100%);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(0, 229, 255, 0.35);
       position: relative;
       overflow: hidden;
+      transform: skewX(-3deg);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .team-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 3px;
-      background: linear-gradient(90deg, transparent, var(--team-color), transparent);
-    }
-    .team-card::after {
+    .team-card-frame::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 0%, var(--team-color), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.4s ease;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0,
+        transparent 4px,
+        rgba(0, 229, 255, 0.015) 4px,
+        rgba(0, 229, 255, 0.015) 5px
+      );
       pointer-events: none;
     }
-    .team-card:hover {
-      border-color: rgba(0,229,255,0.25);
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--glow-cyan-strong);
+    .team-card-frame::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.6), transparent);
+      pointer-events: none;
     }
-    .team-card:hover::after { opacity: 0.06; }
-    .team-card .team-avatar {
-      width: 56px; height: 56px;
+
+    .team-card:hover .team-card-frame {
+      border-color: rgba(0, 229, 255, 0.9);
+      background: linear-gradient(
+        180deg,
+        rgba(0, 229, 255, 0.06) 0%,
+        rgba(10, 20, 60, 0.9) 25%,
+        rgba(10, 20, 60, 0.9) 75%,
+        rgba(0, 229, 255, 0.04) 100%
+      );
+      box-shadow:
+        0 0 8px rgba(0, 229, 255, 0.6),
+        0 0 20px rgba(0, 229, 255, 0.4),
+        0 0 40px rgba(0, 229, 255, 0.2),
+        0 0 80px rgba(0, 229, 255, 0.12),
+        0 0 120px rgba(0, 229, 255, 0.06),
+        inset 0 0 25px rgba(0, 229, 255, 0.12),
+        inset 0 0 50px rgba(0, 229, 255, 0.04);
+      animation: frameGlow 2s ease-in-out infinite;
+    }
+    @keyframes frameGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 8px rgba(0,229,255,0.6), 0 0 20px rgba(0,229,255,0.4),
+          0 0 40px rgba(0,229,255,0.2), 0 0 80px rgba(0,229,255,0.12),
+          0 0 120px rgba(0,229,255,0.06),
+          inset 0 0 25px rgba(0,229,255,0.12), inset 0 0 50px rgba(0,229,255,0.04);
+      }
+      50% {
+        box-shadow:
+          0 0 12px rgba(0,229,255,0.7), 0 0 30px rgba(0,229,255,0.45),
+          0 0 60px rgba(0,229,255,0.25), 0 0 100px rgba(0,229,255,0.15),
+          0 0 150px rgba(0,229,255,0.08),
+          inset 0 0 35px rgba(0,229,255,0.18), inset 0 0 60px rgba(0,229,255,0.06);
+      }
+    }
+    .team-card:hover .team-card-frame::after {
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 1), transparent);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+    }
+
+    .team-card-frame-content {
+      transform: skewX(3deg);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      height: 100%;
+      width: 100%;
+      padding: 16px 8px;
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+      gap: 0;
+    }
+
+    .team-card-zone {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+    }
+    .team-card-zone--name { flex: 1 1 0; }
+    .team-card-zone--emblem {
+      flex: 2 1 0;
+      container-type: size;
+    }
+    .team-card-zone--flag {
+      flex: 3 1 0;
+      container-type: size;
+    }
+    .team-card-zone--name::after,
+    .team-card-zone--emblem::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.3), transparent);
+      pointer-events: none;
+    }
+    .team-card-zone--emblem .team-card-logo {
+      width: min(78cqmin, 100%);
+      height: min(78cqmin, 100%);
+      max-width: 100%;
+      font-size: min(22px, 22cqmin);
+    }
+    .team-card-zone--flag .team-card-map-container {
+      width: min(92cqmin, 100%);
+      height: min(92cqmin, 100%);
+      max-width: 100%;
+      flex: 0 0 auto;
+    }
+
+    .team-card-header {
+      text-align: center;
+    }
+    .team-card-abbr {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-primary);
+      letter-spacing: 2px;
+    }
+    .team-card-subtitle {
+      font-size: 11px;
+      color: var(--accent-cyan);
+      opacity: 0.7;
+      margin-top: 2px;
+      letter-spacing: 1px;
+    }
+
+    .team-card-logo {
+      width: 60px; height: 60px;
       border-radius: 50%;
-      margin: 0 auto 14px;
+      background: var(--team-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
-      font-weight: 800;
+      font-size: 22px;
+      font-weight: 900;
       color: #fff;
-      background: var(--team-color);
-      box-shadow: 0 0 24px rgba(0,0,0,0.4), 0 0 16px color-mix(in srgb, var(--team-color) 30%, transparent);
-      border: 2px solid rgba(255,255,255,0.15);
-      position: relative;
-      z-index: 1;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4), 0 0 12px color-mix(in srgb, var(--team-color) 40%, transparent);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.4s ease;
     }
-    .team-card .team-name {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      position: relative;
-      z-index: 1;
+    .team-card:hover .team-card-logo {
+      transform: scale(1.15);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), 0 0 20px color-mix(in srgb, var(--team-color) 50%, transparent);
     }
-    .team-card .team-score-info {
-      font-size: 13px;
-      color: var(--text-secondary);
-      position: relative;
-      z-index: 1;
+
+    .team-card-map-container {
+      width: 65px; height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--team-color) 30%, transparent));
+      transition: all 0.4s ease;
     }
-    .team-card-map {
+    .team-card:hover .team-card-map-container {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    .team-card-map-container svg {
+      width: 100%; height: 100%;
+      fill: var(--team-color);
+    }
+
+    .frame-corner {
       position: absolute;
-      right: -5%;
-      bottom: -10%;
-      width: 75%;
-      height: 85%;
+      width: 12px; height: 12px;
       pointer-events: none;
-      z-index: 0;
-      opacity: 0.2;
-      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 0.4;
+      transition: opacity 0.4s ease, box-shadow 0.4s ease;
     }
-    .team-card-map svg {
-      width: 100%;
-      height: 100%;
+    .team-card:hover .frame-corner {
+      opacity: 1;
     }
-    .team-card:hover .team-card-map {
-      opacity: 0.35;
-      transform: scale(1.05);
-    }
+    .frame-corner-tl { top: 6px; left: 6px; border-top: 2px solid var(--accent-cyan); border-left: 2px solid var(--accent-cyan); }
+    .frame-corner-tr { top: 6px; right: 6px; border-top: 2px solid var(--accent-cyan); border-right: 2px solid var(--accent-cyan); }
+    .frame-corner-bl { bottom: 6px; left: 6px; border-bottom: 2px solid var(--accent-cyan); border-left: 2px solid var(--accent-cyan); }
+    .frame-corner-br { bottom: 6px; right: 6px; border-bottom: 2px solid var(--accent-cyan); border-right: 2px solid var(--accent-cyan); }
+
+
 
     /* ===== Type Selection Page ===== */
     .type-grid {
@@ -944,13 +1112,15 @@
     /* ===== Sidebar ===== */
     .sidebar {
       width: var(--sidebar-width);
+      min-height: 0;
+      height: 100%;
       flex-shrink: 0;
       background: rgba(5, 8, 22, 0.9);
       backdrop-filter: blur(24px);
       border-left: 1px solid rgba(0,229,255,0.08);
       display: flex;
       flex-direction: column;
-      padding: 20px 14px;
+      padding: 14px 8px 12px;
       position: relative;
       z-index: 1;
     }
@@ -963,12 +1133,12 @@
     }
     .sidebar-title {
       text-align: center;
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: 6px;
+      letter-spacing: 4px;
       color: var(--accent-cyan);
-      margin-bottom: 16px;
-      padding-bottom: 14px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
       border-bottom: 1px solid rgba(0,229,255,0.1);
       text-shadow: 0 0 10px rgba(0,229,255,0.2);
       position: relative;
@@ -982,7 +1152,8 @@
       box-shadow: 0 0 10px var(--accent-cyan);
     }
     .ranking-list {
-      flex: 1;
+      flex: 0 1 auto;
+      min-height: 0;
       overflow-y: auto;
       position: relative;
     }
@@ -991,9 +1162,10 @@
     .rank-item {
       display: flex;
       align-items: center;
-      padding: 14px 14px;
-      margin-bottom: 7px;
-      border-radius: 12px;
+      gap: 4px;
+      padding: 8px 6px;
+      margin-bottom: 5px;
+      border-radius: 10px;
       background: rgba(255,255,255,0.015);
       border: 1px solid transparent;
       transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -1016,14 +1188,14 @@
       box-shadow: 0 0 8px var(--accent-cyan);
     }
     .rank-num {
-      width: 30px; height: 30px;
-      border-radius: 8px;
+      width: 26px; height: 26px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 800;
-      margin-right: 10px;
+      margin-right: 6px;
       flex-shrink: 0;
     }
     .rank-num.top1 { background: linear-gradient(135deg, #ffd700, #ff8f00); color: #1a1a1a; box-shadow: 0 0 12px rgba(255,215,0,0.2); }
@@ -1032,46 +1204,55 @@
     .rank-num.normal { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
     .rank-trophy {
       flex-shrink: 0;
-      margin-right: 6px;
-      display: flex;
-      align-items: center;
-      font-size: 20px;
-      line-height: 1;
-    }
-    .rank-avatar {
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      margin-right: 10px;
+      width: 22px;
+      margin-right: 2px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .rank-trophy--empty {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .rank-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      margin-right: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
       font-weight: 800;
       color: #fff;
       flex-shrink: 0;
       border: 2px solid rgba(255,255,255,0.15);
     }
     .rank-name {
-      flex: 1;
-      font-size: 15px;
+      flex: 1 1 0;
+      min-width: 0;
+      font-size: 12px;
       font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.35;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
     .rank-score {
-      font-size: 18px;
+      flex-shrink: 0;
+      font-size: 14px;
       font-weight: 800;
       color: var(--accent-cyan);
       font-variant-numeric: tabular-nums;
-      min-width: 48px;
+      min-width: 36px;
       text-align: right;
       text-shadow: 0 0 8px rgba(0,229,255,0.2);
     }
     .rank-change {
+      flex-shrink: 0;
       font-size: 11px;
-      margin-left: 4px;
-      min-width: 30px;
+      margin-left: 2px;
+      min-width: 28px;
       text-align: center;
       opacity: 0;
       transition: opacity 0.5s ease;
@@ -1080,22 +1261,30 @@
     .rank-change.up { color: var(--success); text-shadow: 0 0 6px rgba(0,230,118,0.3); }
     .rank-change.down { color: var(--danger); text-shadow: 0 0 6px rgba(255,82,82,0.3); }
     .qr-section {
-      flex-shrink: 0;
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
       text-align: center;
-      padding-top: 20px;
+      padding-top: 10px;
       border-top: 1px solid rgba(0,229,255,0.08);
-      margin-top: 12px;
+      margin-top: 8px;
     }
     .qr-title {
-      font-size: 14px;
+      flex-shrink: 0;
+      font-size: 12px;
       color: var(--text-secondary);
-      margin-bottom: 14px;
-      letter-spacing: 3px;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
       font-weight: 600;
     }
     .qr-placeholder {
-      width: 200px; height: 200px;
-      margin: 0 auto;
+      flex: 1 1 0;
+      min-height: 96px;
+      width: 100%;
+      margin: 0;
       border: 1px solid rgba(0,229,255,0.15);
       border-radius: 12px;
       display: flex;
@@ -1112,7 +1301,14 @@
       border-radius: 16px;
       border: 1px dashed rgba(0,229,255,0.12);
     }
-    .qr-placeholder canvas, .qr-placeholder img { border-radius: 8px; }
+    .qr-placeholder canvas, .qr-placeholder img {
+      border-radius: 8px;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto !important;
+      height: auto !important;
+      object-fit: contain;
+    }
 
     /* ===== Utility ===== */
     .hidden { display: none !important; }
@@ -1319,8 +1515,6 @@
       </div>
 
       <section id="pageTeamSelect" class="page active">
-        <div class="page-title">选择答题队伍</div>
-        <div class="page-subtitle">请选择本轮参与答题的队伍</div>
         <div class="team-grid" id="teamGrid"></div>
       </section>
 
@@ -1682,13 +1876,30 @@ function renderTeamGrid() {
   grid.innerHTML = state.teams.slice(0, 8).map((t, i) => {
     const mapPath = PROVINCE_SVG[t.abbr] || '';
     return `
-    <div class="team-card" style="--team-color:${t.color}" onclick="selectTeam(${i})">
-      <div class="team-card-map">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="${t.color}">${mapPath}</svg>
+    <div class="team-card" onclick="selectTeam(${i})">
+      <div class="team-card-frame" style="--team-color:${t.color}">
+        <div class="team-card-frame-content">
+          <div class="team-card-zone team-card-zone--name">
+            <div class="team-card-header">
+              <div class="team-card-abbr">${t.abbr}</div>
+              <div class="team-card-subtitle">（${t.name}）</div>
+            </div>
+          </div>
+          <div class="team-card-zone team-card-zone--emblem">
+            <div class="team-card-logo">${t.abbr}</div>
+          </div>
+          <div class="team-card-zone team-card-zone--flag">
+            <div class="team-card-map-container">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${mapPath}</svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="frame-corner frame-corner-tl"></div>
+        <div class="frame-corner frame-corner-tr"></div>
+        <div class="frame-corner frame-corner-bl"></div>
+        <div class="frame-corner frame-corner-br"></div>
       </div>
-      <div class="team-avatar" style="background:${t.color}">${t.abbr}</div>
-      <div class="team-name">${t.name}</div>
-      <div class="team-score-info">${t.score} 分</div>
     </div>`;
   }).join('');
 }
@@ -2004,7 +2215,9 @@ function renderRanking() {
   $('#rankingList').innerHTML = sorted.map((t, i) => {
     const rc = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : 'normal';
     const ac = t.id === state.currentTeamIdx ? 'active-team' : '';
-    const trophy = trophySvg[i] ? `<div class="rank-trophy">${trophySvg[i]}</div>` : '';
+    const trophy = trophySvg[i]
+      ? `<div class="rank-trophy">${trophySvg[i]}</div>`
+      : '<div class="rank-trophy rank-trophy--empty" aria-hidden="true"></div>';
     return `<div class="rank-item ${ac}" data-team-id="${t.id}" style="order:${i}">
       <div class="rank-num ${rc}">${i+1}</div>
       ${trophy}
@@ -2060,10 +2273,42 @@ function animateRankingUpdate() {
   });
 }
 
+let qrResizeObserver = null;
+let qrResizeTimer = null;
+function paintQRCode() {
+  const c = $('#qrCode');
+  if (!c || typeof QRCode === 'undefined') return;
+  try {
+    const w = c.clientWidth;
+    const h = c.clientHeight;
+    const side = Math.max(72, Math.min(Math.floor(Math.min(w, h) - 10), 560));
+    if (w < 24 || h < 24) return;
+    if (c.dataset.qrSide === String(side) && c.querySelector('canvas, img')) return;
+    c.dataset.qrSide = String(side);
+    c.innerHTML = '';
+    new QRCode(c, {
+      text: QR_URL,
+      width: side,
+      height: side,
+      colorDark: '#e8ecf1',
+      colorLight: '#050816',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch (e) {
+    c.textContent = '二维码区域';
+  }
+}
+function schedulePaintQRCode() {
+  clearTimeout(qrResizeTimer);
+  qrResizeTimer = setTimeout(() => { requestAnimationFrame(paintQRCode); }, 60);
+}
 function initQRCode() {
   const c = $('#qrCode');
-  try { if (typeof QRCode !== 'undefined') { c.innerHTML = ''; new QRCode(c, { text: QR_URL, width: 180, height: 180, colorDark: '#e8ecf1', colorLight: '#050816', correctLevel: QRCode.CorrectLevel.M }); } }
-  catch(e) { c.textContent = '二维码区域'; }
+  if (!c) return;
+  if (qrResizeObserver) qrResizeObserver.disconnect();
+  qrResizeObserver = new ResizeObserver(schedulePaintQRCode);
+  qrResizeObserver.observe(c);
+  schedulePaintQRCode();
 }
 
 function toggleFullscreen() {
