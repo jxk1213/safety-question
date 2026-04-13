@@ -1722,6 +1722,100 @@
       0% { transform: translate(0, 0) scale(1); opacity: 1; }
       100% { transform: translate(var(--bx), var(--by)) scale(0); opacity: 0; }
     }
+
+    /* ===== Mobile H5 ===== */
+    #mobileApp {
+      display: none;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(0,229,255,0.18), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(156,39,176,0.16), transparent 45%),
+        #050816;
+      color: var(--text-primary);
+      padding: 18px 14px 24px;
+    }
+    .m-card {
+      background: rgba(8, 16, 45, 0.72);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      padding: 14px 12px;
+      margin-bottom: 12px;
+    }
+    .m-title { font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+    .m-subtitle { margin-top: 4px; color: var(--text-secondary); font-size: 13px; }
+    .m-badges { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .m-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      border-radius: 99px;
+      border: 1px solid rgba(0,229,255,0.25);
+      background: rgba(0,229,255,0.08);
+      color: #9fefff;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+    .m-q {
+      font-size: 17px;
+      line-height: 1.6;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .m-options { display: flex; flex-direction: column; gap: 10px; }
+    .m-opt {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(122,134,161,0.35);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      color: var(--text-primary);
+      padding: 10px 12px;
+      font-size: 14px;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+    .m-opt .m-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(122,134,161,0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .m-opt.active {
+      border-color: rgba(0,229,255,0.8);
+      background: rgba(0,229,255,0.18);
+      box-shadow: 0 0 0 1px rgba(0,229,255,0.35) inset;
+    }
+    .m-opt.active .m-letter {
+      background: rgba(0,229,255,0.45);
+      color: #021018;
+    }
+    .m-actions { margin-top: 12px; }
+    .m-submit {
+      width: 100%;
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #00e5ff, #2979ff);
+      color: #031322;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      font-size: 15px;
+    }
+    .m-submit:disabled { opacity: 0.55; }
+    .m-tip { color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+    .m-tip strong { color: #9fefff; }
+    .m-status-ok { color: #7dffb6; }
+    .m-status-warn { color: #ffd27b; }
   </style>
 </head>
 <body>
@@ -1825,11 +1919,40 @@
     
   </div>
 
+  <div id="mobileApp">
+    <div class="m-card">
+      <div class="m-title">观众同步答题</div>
+      <div class="m-subtitle">手机端仅参与答题，结果自动汇总到观众组</div>
+      <div class="m-badges">
+        <span class="m-badge" id="mRoomText">房间：--</span>
+        <span class="m-badge" id="mConnText">连接中...</span>
+        <span class="m-badge" id="mTimerText">倒计时：--</span>
+      </div>
+    </div>
+
+    <div class="m-card" id="mQuestionCard">
+      <div class="m-tip">
+        等待大屏开启答题中...<br>
+        你提交的答案会参与计算观众组判定（观众组答对/答错）。
+      </div>
+    </div>
+
+    <div class="m-card">
+      <div class="m-tip" id="mResultTip">
+        尚未提交本轮答案
+      </div>
+    </div>
+  </div>
+
 <script>
+const PAGE_PARAMS = new URLSearchParams(window.location.search);
+const MODE_IS_MOBILE = PAGE_PARAMS.get('mode') === 'mobile';
+const MOBILE_ROOM_ID = PAGE_PARAMS.get('room') || '';
+
 /* ============================================================
    Particle Network Background
    ============================================================ */
-(function() {
+if (!MODE_IS_MOBILE) (function() {
   const canvas = document.getElementById('particleCanvas');
   const ctx = canvas.getContext('2d');
   let particles = [];
@@ -1920,8 +2043,79 @@
 /* ============================================================
    Configuration
    ============================================================ */
-const QR_URL = 'https://example.com/quiz';
 const TIMER_SECONDS = 30;
+const PEER_HOST_PREFIX = 'aq-host-';
+const MOBILE_SYNC_VERSION = 1;
+const USE_HTTP_SYNC = true;
+const SYNC_API_PATH = '/__sync__';
+/* 若大屏通过本地文件(file://)或 localhost 打开，请改成你电脑可被手机访问的地址，例如：
+   http://192.168.1.23:8080/index.html
+*/
+const MOBILE_PUBLIC_BASE_URL = 'http://192.168.182.46:8080/index.html';
+
+function resolveMobileBaseUrl() {
+  const manual = (MOBILE_PUBLIC_BASE_URL || '').trim();
+  if (manual) return manual;
+  const p = window.location.protocol;
+  const h = window.location.hostname;
+  const isHttp = p === 'http:' || p === 'https:';
+  const isLoopback = h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0' || h === '::1';
+  if (!isHttp || isLoopback) return '';
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
+function resolveSyncOrigin() {
+  const manual = (MOBILE_PUBLIC_BASE_URL || '').trim();
+  if (manual) {
+    try {
+      return new URL(manual, window.location.href).origin;
+    } catch (e) {}
+  }
+  const p = window.location.protocol;
+  if (p === 'http:' || p === 'https:') return window.location.origin;
+  return '';
+}
+
+const SYNC_ORIGIN = resolveSyncOrigin();
+
+function buildSyncUrl(endpoint, query = {}) {
+  if (!endpoint) return '';
+  const base = SYNC_ORIGIN ? `${SYNC_ORIGIN}${SYNC_API_PATH}${endpoint}` : `${SYNC_API_PATH}${endpoint}`;
+  let urlObj;
+  try {
+    urlObj = new URL(base, window.location.href);
+  } catch (e) {
+    return '';
+  }
+  Object.entries(query).forEach(([key, val]) => {
+    if (val === undefined || val === null || val === '') return;
+    urlObj.searchParams.set(key, String(val));
+  });
+  return urlObj.toString();
+}
+
+function getMobileEntryUrl(roomId) {
+  const baseUrl = resolveMobileBaseUrl();
+  if (!baseUrl) return '';
+  const target = new URL(baseUrl, window.location.href);
+  target.searchParams.set('mode', 'mobile');
+  if (roomId) target.searchParams.set('room', roomId);
+  return target.toString();
+}
+
+async function syncFetchJson(url, options = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  try {
+    const res = await fetch(url, { ...options, signal: ctrl.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const PROVINCE_SVG = {
   '浙': '<path d="M48,2 L58,4 L66,8 L72,14 L78,24 L84,32 L86,40 L82,46 L88,52 L86,58 L80,64 L84,72 L78,82 L70,92 L60,100 L50,98 L42,92 L34,84 L28,74 L22,62 L18,50 L16,38 L20,28 L26,18 L34,10 L42,4 Z"/>',
@@ -2075,11 +2269,362 @@ const state = {
   usedTiles: { judge: new Set(), single: new Set(), multi: new Set(), uncertain: new Set() },
   otherTeamResults: {},
   drawSelectedTile: -1,
-  settled: false
+  settled: false,
+  roundId: 0,
+  mobileSync: {
+    roomId: null,
+    peer: null,
+    hostConn: null,
+    connections: new Map(),
+    participants: new Set(),
+    hostPushTimer: null,
+    answerPullTimer: null,
+    mobilePollTimer: null,
+    audienceRoundStats: { total: 0, correct: 0, answeredPeers: new Set() }
+  }
 };
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
+const AUDIENCE_TEAM_ID = 8;
+
+function genRoomId() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function checkAnswerByType(type, question, selectedOptions) {
+  const sel = [...selectedOptions].sort((a, b) => a - b);
+  if (type === 'judge') {
+    const c = question.answer ? 0 : 1;
+    return sel.length === 1 && sel[0] === c;
+  }
+  if (type === 'single') return sel.length === 1 && sel[0] === question.answer;
+  const correct = [...question.answer].sort((a, b) => a - b);
+  return sel.length === correct.length && sel.every((v, i) => v === correct[i]);
+}
+
+function resetAudienceRoundStats() {
+  state.mobileSync.audienceRoundStats = { total: 0, correct: 0, answeredPeers: new Set() };
+}
+
+function getAudienceAutoResult() {
+  const stats = state.mobileSync.audienceRoundStats;
+  if (!stats.total) return undefined;
+  return stats.correct * 2 >= stats.total;
+}
+
+function applyAudienceAutoResultToState() {
+  if (state.currentTeamIdx === AUDIENCE_TEAM_ID) return;
+  const autoResult = getAudienceAutoResult();
+  if (autoResult === undefined) delete state.otherTeamResults[AUDIENCE_TEAM_ID];
+  else state.otherTeamResults[AUDIENCE_TEAM_ID] = autoResult;
+}
+
+function renderAudienceAutoResultTag() {
+  const row = $(`#ot-${AUDIENCE_TEAM_ID}`);
+  if (!row) return;
+  const stats = state.mobileSync.audienceRoundStats;
+  const statusEl = row.querySelector('.ot-status');
+  if (!statusEl) return;
+  row.classList.remove('ot-unset', 'ot-correct', 'ot-wrong');
+  if (!stats.total) {
+    row.classList.add('ot-unset');
+    statusEl.textContent = '未作答';
+    return;
+  }
+  const isCorrect = stats.correct * 2 >= stats.total;
+  row.classList.add(isCorrect ? 'ot-correct' : 'ot-wrong');
+  statusEl.textContent = `观众 ${stats.correct}/${stats.total}`;
+}
+
+function getHostPayload() {
+  const team = state.currentTeamIdx >= 0 ? state.teams[state.currentTeamIdx] : null;
+  return {
+    version: MOBILE_SYNC_VERSION,
+    roomId: state.mobileSync.roomId,
+    page: state.currentPage,
+    roundId: state.roundId,
+    timeLeft: state.timeLeft,
+    type: state.currentType,
+    teamIdx: state.currentTeamIdx,
+    teamName: team ? team.name : '',
+    question: state.currentQuestion
+      ? { q: state.currentQuestion.q, options: state.currentQuestion.options || null }
+      : null
+  };
+}
+
+function broadcastToMobiles(message) {
+  if (!USE_HTTP_SYNC || !state.mobileSync.roomId) return;
+  if (!message || message.type !== 'audience_stats') return;
+  const url = buildSyncUrl('/audience_stats', { room: state.mobileSync.roomId });
+  if (!url) return;
+  syncFetchJson(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(message.payload || {})
+  });
+}
+
+function broadcastHostState() {
+  if (MODE_IS_MOBILE) return;
+  if (USE_HTTP_SYNC && state.mobileSync.roomId) {
+    const url = buildSyncUrl('/host_state', { room: state.mobileSync.roomId });
+    if (!url) return;
+    syncFetchJson(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(getHostPayload())
+    });
+    return;
+  }
+  broadcastToMobiles({ type: 'host_state', payload: getHostPayload() });
+}
+
+function handleMobileAnswer(peerId, data) {
+  if (!state.currentQuestion || state.currentPage !== 'answer') return;
+  if (data.roundId !== state.roundId) return;
+  const stats = state.mobileSync.audienceRoundStats;
+  if (stats.answeredPeers.has(peerId)) return;
+  const selected = Array.isArray(data.selectedOptions) ? data.selectedOptions : [];
+  const ok = checkAnswerByType(state.currentType, state.currentQuestion, selected);
+  stats.answeredPeers.add(peerId);
+  stats.total += 1;
+  if (ok) stats.correct += 1;
+  applyAudienceAutoResultToState();
+  renderAudienceAutoResultTag();
+}
+
+function bindMobileConn(conn) {
+  conn.on('open', () => {
+    state.mobileSync.connections.set(conn.peer, conn);
+    state.mobileSync.participants.add(conn.peer);
+    try {
+      conn.send({ type: 'host_state', payload: getHostPayload() });
+      conn.send({ type: 'audience_stats', payload: { total: state.mobileSync.audienceRoundStats.total, correct: state.mobileSync.audienceRoundStats.correct } });
+    } catch (e) {}
+  });
+  conn.on('data', data => {
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'join') {
+      state.mobileSync.participants.add(conn.peer);
+      return;
+    }
+    if (data.type === 'mobile_answer') {
+      handleMobileAnswer(conn.peer, data);
+      broadcastToMobiles({ type: 'audience_stats', payload: { total: state.mobileSync.audienceRoundStats.total, correct: state.mobileSync.audienceRoundStats.correct } });
+    }
+  });
+  conn.on('close', () => {
+    state.mobileSync.connections.delete(conn.peer);
+    state.mobileSync.participants.delete(conn.peer);
+  });
+  conn.on('error', () => {
+    state.mobileSync.connections.delete(conn.peer);
+    state.mobileSync.participants.delete(conn.peer);
+  });
+}
+
+function initDesktopMobileSync() {
+  if (MODE_IS_MOBILE) return;
+  if (state.mobileSync.roomId) return;
+  const roomId = genRoomId();
+  state.mobileSync.roomId = roomId;
+  const titleEl = document.querySelector('.qr-title');
+  if (titleEl) {
+    const reachable = !!resolveMobileBaseUrl();
+    titleEl.textContent = reachable
+      ? `扫码参与答题（房间 ${roomId}）`
+      : `扫码参与答题（请先配置可访问地址）`;
+  }
+  schedulePaintQRCode();
+  if (USE_HTTP_SYNC) {
+    clearInterval(state.mobileSync.hostPushTimer);
+    clearInterval(state.mobileSync.answerPullTimer);
+    state.mobileSync.hostPushTimer = setInterval(() => {
+      broadcastHostState();
+    }, 700);
+    state.mobileSync.answerPullTimer = setInterval(async () => {
+      if (!state.mobileSync.roomId) return;
+      const url = buildSyncUrl('/answers', { room: state.mobileSync.roomId, roundId: state.roundId });
+      if (!url) return;
+      const data = await syncFetchJson(url);
+      const answers = data && Array.isArray(data.answers) ? data.answers : [];
+      answers.forEach(item => {
+        const clientId = item.clientId || 'unknown';
+        handleMobileAnswer(clientId, item);
+      });
+      if (data && Array.isArray(data.clients)) {
+        state.mobileSync.participants = new Set(data.clients);
+      }
+    }, 900);
+    broadcastHostState();
+  }
+}
+
+let mobileClientState = {
+  host: null,
+  payload: null,
+  submittedRoundId: -1,
+  selectedOptions: [],
+  reconnectTimer: null,
+  clientId: localStorage.getItem('audienceClientId') || `m-${Math.random().toString(36).slice(2, 10)}`,
+  lastOkAt: 0
+};
+localStorage.setItem('audienceClientId', mobileClientState.clientId);
+
+function getMobileTypeName(type) {
+  const cfg = TYPE_CONFIG[type];
+  return cfg ? cfg.name : '--';
+}
+
+function mobileToggleOption(idx) {
+  const p = mobileClientState.payload;
+  if (!p || p.page !== 'answer') return;
+  if (mobileClientState.submittedRoundId === p.roundId) return;
+  if (p.type === 'judge' || p.type === 'single') {
+    mobileClientState.selectedOptions = [idx];
+  } else {
+    const pos = mobileClientState.selectedOptions.indexOf(idx);
+    if (pos >= 0) mobileClientState.selectedOptions.splice(pos, 1);
+    else mobileClientState.selectedOptions.push(idx);
+  }
+  renderMobileQuestionCard();
+}
+
+function mobileSubmitAnswer() {
+  const p = mobileClientState.payload;
+  if (!p || p.page !== 'answer') return;
+  if (mobileClientState.submittedRoundId === p.roundId) return;
+  const selectedOptions = [...mobileClientState.selectedOptions].sort((a, b) => a - b);
+  if (USE_HTTP_SYNC) {
+    const url = buildSyncUrl('/answer', { room: MOBILE_ROOM_ID, clientId: mobileClientState.clientId });
+    if (!url) return;
+    syncFetchJson(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roundId: p.roundId, selectedOptions })
+    });
+  } else if (mobileClientState.host && mobileClientState.host.open) {
+    mobileClientState.host.send({
+      type: 'mobile_answer',
+      roundId: p.roundId,
+      selectedOptions
+    });
+  } else {
+    return;
+  }
+  mobileClientState.submittedRoundId = p.roundId;
+  const tip = $('#mResultTip');
+  if (tip) tip.innerHTML = '<span class="m-status-ok">本轮已提交，等待大屏结算</span>';
+  renderMobileQuestionCard();
+}
+
+function renderMobileQuestionCard() {
+  const card = $('#mQuestionCard');
+  if (!card) return;
+  const p = mobileClientState.payload;
+  if (!p) {
+    const connected = Date.now() - mobileClientState.lastOkAt < 5000;
+    card.innerHTML = connected
+      ? `<div class="m-tip">已连接大屏，等待主持人开始...</div>`
+      : `<div class="m-tip">正在连接大屏，请稍候...</div>`;
+    return;
+  }
+  if (p.page === 'teamSelect' || p.teamIdx < 0) {
+    card.innerHTML = `<div class="m-tip">等待主持人选择参赛队伍...</div>`;
+    return;
+  }
+  if (p.page === 'typeSelect' || p.page === 'questionDraw' || !p.question) {
+    card.innerHTML = `<div class="m-tip">当前队伍：<strong>${p.teamName || '--'}</strong><br>等待主持人选择题目...</div>`;
+    return;
+  }
+  if (p.page === 'result') {
+    card.innerHTML = `<div class="m-tip">本轮已进入结算阶段，等待下一轮答题...</div>`;
+    return;
+  }
+  const options = p.type === 'judge' ? ['正确', '错误'] : (p.question.options || []);
+  const submitted = mobileClientState.submittedRoundId === p.roundId;
+  card.innerHTML = `
+    <div class="m-q">${p.question.q}</div>
+    <div class="m-options">
+      ${options.map((text, i) => `
+        <button class="m-opt ${mobileClientState.selectedOptions.includes(i) ? 'active' : ''}" onclick="mobileToggleOption(${i})" ${submitted ? 'disabled' : ''}>
+          <span class="m-letter">${String.fromCharCode(65 + i)}</span>
+          <span>${text}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div class="m-actions">
+      <button class="m-submit" onclick="mobileSubmitAnswer()" ${submitted ? 'disabled' : ''}>
+        ${submitted ? '已提交' : '提交到观众组'}
+      </button>
+    </div>
+  `;
+}
+
+function updateMobileStatus() {
+  const room = $('#mRoomText');
+  const conn = $('#mConnText');
+  const timer = $('#mTimerText');
+  if (room) room.textContent = `房间：${MOBILE_ROOM_ID || '--'}`;
+  const connected = Date.now() - mobileClientState.lastOkAt < 5000;
+  if (conn) {
+    conn.textContent = connected ? '连接：已连接大屏' : '连接：重连中...';
+    conn.className = `m-badge ${connected ? 'm-status-ok' : 'm-status-warn'}`;
+  }
+  const p = mobileClientState.payload;
+  if (timer) timer.textContent = `倒计时：${p && typeof p.timeLeft === 'number' ? `${p.timeLeft}s` : '--'}`;
+}
+
+function initMobileMode() {
+  const app = $('#app');
+  const mobile = $('#mobileApp');
+  if (app) app.style.display = 'none';
+  if (mobile) mobile.style.display = 'block';
+  document.body.style.overflow = 'auto';
+  if (!MOBILE_ROOM_ID) {
+    const c = $('#mQuestionCard');
+    if (c) c.innerHTML = '<div class="m-tip">二维码参数缺失，无法加入答题房间。</div>';
+    updateMobileStatus();
+    return;
+  }
+  if (state.mobileSync.mobilePollTimer) {
+    updateMobileStatus();
+    return;
+  }
+  if (USE_HTTP_SYNC) {
+    state.mobileSync.mobilePollTimer = setInterval(async () => {
+      const stateUrl = buildSyncUrl('/host_state', { room: MOBILE_ROOM_ID, clientId: mobileClientState.clientId });
+      if (!stateUrl) return;
+      const data = await syncFetchJson(stateUrl);
+      if (data && data.ok) {
+        mobileClientState.lastOkAt = Date.now();
+      }
+      if (data && data.payload) {
+        const oldRound = mobileClientState.payload ? mobileClientState.payload.roundId : -1;
+        mobileClientState.payload = data.payload;
+        if (mobileClientState.payload.roundId !== oldRound) {
+          mobileClientState.submittedRoundId = -1;
+          mobileClientState.selectedOptions = [];
+          const tip = $('#mResultTip');
+          if (tip) tip.textContent = '尚未提交本轮答案';
+        }
+        const stats = data.audienceStats || null;
+        if (stats) {
+          const tip = $('#mResultTip');
+          if (tip) tip.innerHTML = `观众组统计：<strong>${stats.correct || 0}/${stats.total || 0}</strong> 人回答正确`;
+        }
+      }
+      renderMobileQuestionCard();
+      updateMobileStatus();
+    }, 900);
+    renderMobileQuestionCard();
+    updateMobileStatus();
+    return;
+  }
+  updateMobileStatus();
+}
 
 function showPage(name) {
   $$('.page').forEach(p => p.classList.remove('active'));
@@ -2087,6 +2632,7 @@ function showPage(name) {
   $(`#${map[name]}`).classList.add('active');
   state.currentPage = name;
   renderRanking();
+  broadcastHostState();
 }
 
 function makeTeamBadge(teamIdx) {
@@ -2270,6 +2816,9 @@ function renderAnswerPage() {
     ).join('');
   }
   resetTimer();
+  state.roundId += 1;
+  resetAudienceRoundStats();
+  broadcastHostState();
 }
 
 function toggleOption(idx) {
@@ -2307,6 +2856,7 @@ function updateTimerUI() {
   text.classList.remove('warning', 'danger');
   if (t <= 5) { circle.classList.add('danger'); text.classList.add('danger'); }
   else if (t <= 10) { circle.classList.add('warning'); text.classList.add('warning'); }
+  broadcastHostState();
 }
 
 function submitAnswer() {
@@ -2316,6 +2866,7 @@ function submitAnswer() {
   $('#btnSubmit').disabled = true;
   $('#btnSubmit').textContent = '已提交';
   showAnswerFeedback();
+  broadcastHostState();
   setTimeout(() => { renderResultPage(); showPage('result'); }, 1500);
 }
 
@@ -2362,23 +2913,23 @@ function renderResultPage() {
   $('#otherTeamsGrid').innerHTML = state.teams.filter((_, i) => i !== state.currentTeamIdx).map(t =>
     `<div class="other-team-item ot-unset" id="ot-${t.id}" onclick="toggleOtherTeam(${t.id})"><span class="ot-dot" style="background:${t.color}"></span><span class="ot-name">${t.name}</span><span class="ot-status">未设置</span></div>`
   ).join('');
+  applyAudienceAutoResultToState();
+  renderAudienceAutoResultTag();
+  broadcastToMobiles({ type: 'audience_stats', payload: { total: state.mobileSync.audienceRoundStats.total, correct: state.mobileSync.audienceRoundStats.correct } });
   $('#scoreBreakdown').style.display = 'none';
   $('#btnSettle').classList.remove('hidden');
   $('#btnNext').classList.add('hidden');
   state.settled = false;
+  broadcastHostState();
 }
 
 function checkCorrect() {
-  const q = state.currentQuestion, type = state.currentType;
-  const sel = [...state.selectedOptions].sort();
-  if (type === 'judge') { const c = q.answer ? 0 : 1; return sel.length === 1 && sel[0] === c; }
-  if (type === 'single') return sel.length === 1 && sel[0] === q.answer;
-  const correct = [...q.answer].sort();
-  return sel.length === correct.length && sel.every((v, i) => v === correct[i]);
+  return checkAnswerByType(state.currentType, state.currentQuestion, state.selectedOptions);
 }
 
 function toggleOtherTeam(teamId) {
   if (state.settled) return;
+  if (teamId === AUDIENCE_TEAM_ID && state.mobileSync.audienceRoundStats.total > 0) return;
   const c = state.otherTeamResults[teamId];
   if (c === undefined) state.otherTeamResults[teamId] = true;
   else if (c === true) state.otherTeamResults[teamId] = false;
@@ -2433,6 +2984,7 @@ function showScoreFloat(text, isPositive) {
 function settleScore() {
   if (state.settled) return;
   state.settled = true;
+  applyAudienceAutoResultToState();
   const isCorrect = checkCorrect(), type = state.currentType, base = TYPE_CONFIG[type].score;
   const others = state.teams.filter((_, i) => i !== state.currentTeamIdx);
   let oC = 0, oW = 0, oU = 0;
@@ -2461,10 +3013,19 @@ function settleScore() {
   $('#btnSettle').classList.add('hidden');
   $('#btnNext').classList.remove('hidden');
   animateRankingUpdate();
+  broadcastHostState();
 }
 
-function nextRound() { renderTeamGrid(); showPage('teamSelect'); }
-function backToTypeSelect() { renderTypeGrid(false); showPage('typeSelect'); }
+function nextRound() {
+  renderTeamGrid();
+  showPage('teamSelect');
+  broadcastHostState();
+}
+function backToTypeSelect() {
+  renderTypeGrid(false);
+  showPage('typeSelect');
+  broadcastHostState();
+}
 
 function renderRanking() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
@@ -2541,15 +3102,21 @@ function paintQRCode() {
   const c = $('#qrCode');
   if (!c || typeof QRCode === 'undefined') return;
   try {
+    const qrTarget = state.mobileSync.roomId ? getMobileEntryUrl(state.mobileSync.roomId) : '';
     const w = c.clientWidth;
     const h = c.clientHeight;
     const side = Math.max(72, Math.min(Math.floor(Math.min(w, h) - 10), 560));
     if (w < 24 || h < 24) return;
-    if (c.dataset.qrSide === String(side) && c.querySelector('canvas, img')) return;
+    if (!qrTarget) {
+      c.innerHTML = '<div style="padding:8px 6px;line-height:1.5;font-size:12px;color:#ffd27b;text-align:center;">当前地址手机不可访问<br>请用 http(s) + 局域网IP 打开大屏页面<br>并在代码中设置 MOBILE_PUBLIC_BASE_URL</div>';
+      return;
+    }
+    if (c.dataset.qrSide === String(side) && c.dataset.qrText === qrTarget && c.querySelector('canvas, img')) return;
     c.dataset.qrSide = String(side);
+    c.dataset.qrText = qrTarget;
     c.innerHTML = '';
     new QRCode(c, {
-      text: QR_URL,
+      text: qrTarget,
       width: side,
       height: side,
       colorDark: '#e8ecf1',
@@ -2557,7 +3124,7 @@ function paintQRCode() {
       correctLevel: QRCode.CorrectLevel.M
     });
   } catch (e) {
-    c.textContent = '二维码区域';
+    c.textContent = '二维码加载失败';
   }
 }
 function schedulePaintQRCode() {
@@ -2596,8 +3163,13 @@ function onRankingTeamPick(teamId) {
 }
 
 function init() {
+  if (MODE_IS_MOBILE) {
+    initMobileMode();
+    return;
+  }
   renderTeamGrid();
   renderRanking();
+  initDesktopMobileSync();
   initQRCode();
   const rk = $('#rankingList');
   if (rk) {
