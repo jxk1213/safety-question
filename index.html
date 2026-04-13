@@ -1730,9 +1730,10 @@
       background:
         radial-gradient(circle at 20% 10%, rgba(0,229,255,0.18), transparent 40%),
         radial-gradient(circle at 80% 80%, rgba(156,39,176,0.16), transparent 45%),
+        linear-gradient(160deg, rgba(13, 24, 70, 0.35), rgba(9, 8, 35, 0.15)),
         #050816;
       color: var(--text-primary);
-      padding: 18px 14px 24px;
+      padding: 16px 14px 26px;
     }
     .m-card {
       background: rgba(8, 16, 45, 0.72);
@@ -1743,6 +1744,56 @@
       box-shadow: 0 12px 40px rgba(0,0,0,0.35);
       padding: 14px 12px;
       margin-bottom: 12px;
+    }
+    .m-hero-card {
+      padding: 16px 14px;
+      background:
+        linear-gradient(130deg, rgba(0, 229, 255, 0.16), rgba(41, 121, 255, 0.08)),
+        rgba(8, 16, 45, 0.82);
+      border-color: rgba(0,229,255,0.36);
+      box-shadow:
+        0 14px 40px rgba(0,0,0,0.35),
+        inset 0 0 18px rgba(0,229,255,0.16);
+    }
+    .m-brand {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      line-height: 1.2;
+      background: linear-gradient(90deg, #d7f7ff 0%, #84e8ff 45%, #97b8ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .m-event-title {
+      margin-top: 6px;
+      font-size: 16px;
+      color: #9fefff;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+    }
+    .m-intro {
+      margin-top: 8px;
+      color: #b5c4de;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .m-feature-list {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .m-feature-item {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.26);
+      padding: 4px 10px;
+      background: rgba(0,229,255,0.1);
+      color: #a8f4ff;
+      font-size: 12px;
+      white-space: nowrap;
     }
     .m-title { font-size: 22px; font-weight: 800; letter-spacing: 1px; }
     .m-subtitle { margin-top: 4px; color: var(--text-secondary); font-size: 13px; }
@@ -1816,6 +1867,64 @@
     .m-tip strong { color: #9fefff; }
     .m-status-ok { color: #7dffb6; }
     .m-status-warn { color: #ffd27b; }
+    .m-answer-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
+      margin-bottom: 12px;
+    }
+    .m-type-chip {
+      align-self: start;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.4);
+      background: rgba(0,229,255,0.1);
+      color: #99f0ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      padding: 6px 11px;
+    }
+    .m-countdown-box {
+      min-width: 118px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,229,255,0.38);
+      background: linear-gradient(140deg, rgba(0, 229, 255, 0.24), rgba(41, 121, 255, 0.14));
+      box-shadow: 0 0 0 1px rgba(0,229,255,0.18) inset, 0 8px 20px rgba(0,0,0,0.25);
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .m-countdown-label {
+      color: #b9e5ff;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+    .m-countdown-value {
+      margin-top: 4px;
+      color: #ecfbff;
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 0.95;
+      text-shadow: 0 0 12px rgba(0,229,255,0.45);
+    }
+    .m-countdown-value span {
+      margin-left: 2px;
+      font-size: 16px;
+      font-weight: 700;
+      opacity: 0.9;
+    }
+    .m-countdown-value.warn {
+      color: #ffd1a6;
+      text-shadow: 0 0 14px rgba(255, 144, 66, 0.65);
+      animation: mTimerPulse 1s ease-in-out infinite;
+    }
+    @keyframes mTimerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
   </style>
 </head>
 <body>
@@ -1920,6 +2029,17 @@
   </div>
 
   <div id="mobileApp">
+    <div class="m-card m-hero-card">
+      <div class="m-brand">AI申通 AI安全</div>
+      <div class="m-event-title">安全生产月安全知识竞答</div>
+      <div class="m-intro">面向观众实时同步答题，提交结果自动汇总到观众组统计。</div>
+      <div class="m-feature-list">
+        <span class="m-feature-item">实时倒计时</span>
+        <span class="m-feature-item">题型清晰标注</span>
+        <span class="m-feature-item">即时汇总结果</span>
+      </div>
+    </div>
+
     <div class="m-card">
       <div class="m-title">观众同步答题</div>
       <div class="m-subtitle">手机端仅参与答题，结果自动汇总到观众组</div>
@@ -2545,7 +2665,19 @@ function renderMobileQuestionCard() {
   }
   const options = p.type === 'judge' ? ['正确', '错误'] : (p.question.options || []);
   const submitted = mobileClientState.submittedRoundId === p.roundId;
+  const timeLeft = typeof p.timeLeft === 'number' ? p.timeLeft : null;
+  const showWarn = typeof timeLeft === 'number' && timeLeft <= 8;
+  const typeName = getMobileTypeName(p.type);
   card.innerHTML = `
+    <div class="m-answer-head">
+      <div class="m-type-chip">当前题型：${typeName}</div>
+      <div class="m-countdown-box">
+        <div class="m-countdown-label">本题倒计时</div>
+        <div class="m-countdown-value ${showWarn ? 'warn' : ''}">
+          ${timeLeft !== null ? timeLeft : '--'}<span>s</span>
+        </div>
+      </div>
+    </div>
     <div class="m-q">${p.question.q}</div>
     <div class="m-options">
       ${options.map((text, i) => `
