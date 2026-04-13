@@ -27,6 +27,11 @@
       --warning: #ffab40;
       --border-glow: rgba(0, 229, 255, 0.2);
       --sidebar-width: max(168px, calc(100vw / 6));
+      /* 与首页 .team-grid 单列卡片一致：列宽 + 行高（主区留白与首页队伍区相同算法） */
+      --team-grid-gap: clamp(8px, 1vw, 14px);
+      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - 7 * var(--team-grid-gap)) / 8);
+      /* 100vh − 主区上下 padding(40) − 标题区(~100) − 首页队伍网格上下 padding(18) − 额外余量以防被底部遮挡 */
+      --home-team-card-height: calc(100vh - 180px);
       --glow-cyan: 0 0 20px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.05);
       --glow-cyan-strong: 0 0 15px rgba(0,229,255,0.3), 0 0 45px rgba(0,229,255,0.1), 0 0 80px rgba(0,229,255,0.05);
     }
@@ -149,7 +154,9 @@
       padding: 20px 28px 20px 36px;
       position: relative;
       z-index: 1;
-      overflow: hidden;
+      /* 允许斜切省区卡、动效在横向略微越界，避免角被裁切 */
+      overflow-x: visible;
+      overflow-y: hidden;
     }
     .main-header {
       text-align: center;
@@ -582,30 +589,169 @@
 
 
     /* ===== Type Selection Page ===== */
+    #pageTypeSelect.page {
+      justify-content: flex-start;
+      overflow-y: auto;
+      overflow-x: visible;
+      min-height: 0;
+      padding-bottom: 20px;
+      /* 为 skew、入场动画 translateX 留出空间，避免在 overflow-y:auto 下横向被裁 */
+      padding-left: clamp(24px, 4vw, 56px);
+      padding-right: clamp(16px, 3vw, 36px);
+      box-sizing: border-box;
+    }
+    .type-select-row {
+      display: flex;
+      align-items: stretch; /* Stretch cards to fill the provincial card height */
+      justify-content: center;
+      gap: 28px;
+      width: 100%;
+      max-width: min(1520px, 100%);
+      perspective: 1200px;
+      overflow: visible;
+      position: relative;
+      z-index: 0;
+    }
+    .type-team-spot {
+      flex: 0 0 auto;
+      width: var(--home-team-card-width);
+      height: var(--home-team-card-height);
+      min-width: 0;
+      display: flex;
+      align-items: stretch;
+      position: relative;
+      z-index: 2;
+      overflow: visible;
+    }
+    /* 题型页省区卡：与首页相同的斜长 team-card-frame，仅外层加进入动画 */
+    .type-team-card-shell {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      transform-style: preserve-3d;
+      pointer-events: none;
+      overflow: visible;
+      --team-card-enter-duration: 0.9s;
+    }
+    .type-team-card--enter {
+      animation: typeTeamCardSlideIn var(--team-card-enter-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes typeTeamCardSlideIn {
+      0% {
+        transform: translateX(72px) translateZ(-40px) scale(0.82) rotateY(-14deg);
+        opacity: 0;
+        filter: blur(10px) brightness(1.4);
+      }
+      45% {
+        transform: translateX(-14px) translateZ(12px) scale(1.07) rotateY(6deg);
+        opacity: 1;
+        filter: blur(0) brightness(1.15);
+      }
+      72% {
+        transform: translateX(8px) translateZ(0) scale(0.98) rotateY(-3deg);
+        filter: blur(0) brightness(1.05);
+      }
+      100% {
+        transform: translateX(0) translateZ(0) scale(1) rotateY(0);
+        opacity: 1;
+        filter: blur(0) brightness(1);
+      }
+    }
+    #pageTypeSelect .type-team-spot .team-card-frame {
+      width: 100%;
+      height: 100%;
+      flex: none;
+      min-height: 0;
+      aspect-ratio: unset;
+      overflow: visible;
+    }
+    /* 与 #pageTeamSelect 省区卡内排版一致（同尺寸同字号） */
+    #pageTypeSelect .type-team-spot .team-card-frame-content {
+      padding: clamp(14px, 2.2vmin, 28px) clamp(8px, 1.2vmin, 14px);
+    }
+    #pageTypeSelect .type-team-spot .team-card-abbr {
+      font-size: clamp(18px, 2.4vmin, 36px);
+    }
+    #pageTypeSelect .type-team-spot .team-card-subtitle {
+      font-size: clamp(10px, 1.35vmin, 15px);
+    }
+    #pageTypeSelect .type-team-spot .team-card-zone--emblem .team-card-logo {
+      width: min(80cqmin, 100%);
+      height: min(80cqmin, 100%);
+      font-size: clamp(16px, 24cqmin, 40px);
+    }
+    #pageTypeSelect .type-team-spot .team-card-zone--flag .team-card-map-container {
+      width: min(94cqmin, 100%);
+      height: min(94cqmin, 100%);
+    }
+    #pageTypeSelect .type-team-spot .frame-corner {
+      width: clamp(12px, 1.4vmin, 16px);
+      height: clamp(12px, 1.4vmin, 16px);
+    }
     .type-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
+      gap: 32px; /* Increased gap for larger cards */
       max-width: 100%;
       width: 100%;
+      flex: 1 1 0;
+      min-width: 0;
+      position: relative;
+      z-index: 1;
     }
     .type-card {
-      background: var(--bg-glass);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 18px;
-      padding: 40px 20px;
+      --type-card-art: none;
+      background: rgba(6, 10, 28, 0.95);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 22px 22px 36px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: border-color 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+      isolation: isolate;
+    }
+    /* 题型整卡背景图 + 自上而下罩层，底部加深保证文案可读 */
+    .type-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      z-index: 0;
+      pointer-events: none;
+      background-color: #0a1430;
+      background-image:
+        linear-gradient(180deg,
+          rgba(4, 8, 22, 0.06) 0%,
+          rgba(4, 8, 22, 0.12) 32%,
+          rgba(4, 8, 22, 0.48) 68%,
+          rgba(4, 8, 22, 0.88) 100%),
+        var(--type-card-art);
+      background-size: cover, cover;
+      background-position: center center, center center;
+      background-repeat: no-repeat;
+      filter: brightness(1.14) contrast(1.08) saturate(1.06);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.18);
+    }
+    .type-card[data-type="single"]::after {
+      background-position: center center, center 52%;
     }
     .type-card::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 30%, rgba(0,229,255,0.08), transparent 60%);
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 28%, rgba(0,229,255,0.16), transparent 55%);
       opacity: 0;
       transition: opacity 0.4s ease;
     }
@@ -615,64 +761,38 @@
       box-shadow: var(--glow-cyan-strong);
     }
     .type-card:hover::before { opacity: 1; }
-    .type-card .type-icon {
-      width: 70px; height: 70px;
-      margin: 0 auto 18px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: 800;
-      border: 2px solid;
+    .type-card:hover::after {
+      filter: brightness(1.22) contrast(1.1) saturate(1.08);
+    }
+    .type-card:hover::after { transform: scale(1.045); }
+    .type-card .type-info {
+      flex-shrink: 0;
+      width: 100%;
       position: relative;
-      z-index: 1;
-      transition: all 0.4s ease;
-    }
-    .type-card:hover .type-icon { transform: scale(1.1); }
-    .type-card[data-type="judge"] .type-icon {
-      color: #4fc3f7; border-color: rgba(79,195,247,0.3);
-      background: rgba(79,195,247,0.08);
-      box-shadow: 0 0 20px rgba(79,195,247,0.1);
-    }
-    .type-card[data-type="single"] .type-icon {
-      color: #81c784; border-color: rgba(129,199,132,0.3);
-      background: rgba(129,199,132,0.08);
-      box-shadow: 0 0 20px rgba(129,199,132,0.1);
-    }
-    .type-card[data-type="multi"] .type-icon {
-      color: #ffb74d; border-color: rgba(255,183,77,0.3);
-      background: rgba(255,183,77,0.08);
-      box-shadow: 0 0 20px rgba(255,183,77,0.1);
-    }
-    .type-card[data-type="uncertain"] .type-icon {
-      color: #ce93d8; border-color: rgba(206,147,216,0.3);
-      background: rgba(206,147,216,0.08);
-      box-shadow: 0 0 20px rgba(206,147,216,0.1);
+      z-index: 2;
     }
     .type-card .type-name {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
     }
     .type-card .type-score {
-      font-size: 32px;
-      font-weight: 800;
+      font-size: 42px;
+      font-weight: 900;
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85));
+      margin-bottom: 12px;
     }
     .type-card .type-remain {
-      font-size: 13px;
-      color: var(--text-secondary);
-      position: relative;
-      z-index: 1;
+      font-size: 15px;
+      color: rgba(230, 238, 255, 0.88);
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
     }
     .type-card.disabled {
       opacity: 0.3;
@@ -692,6 +812,7 @@
       margin-bottom: 28px;
     }
     .tile {
+      --tile-bg: none;
       aspect-ratio: 1;
       display: flex;
       align-items: center;
@@ -701,56 +822,75 @@
       font-weight: 700;
       cursor: pointer;
       border: 1px solid rgba(0,229,255,0.18);
-      background: linear-gradient(145deg, rgba(8,20,60,0.9), rgba(5,12,40,0.95));
-      backdrop-filter: blur(10px);
-      color: rgba(0,229,255,0.7);
+      background-color: transparent;
+      background-image:
+        linear-gradient(145deg, rgba(8,20,60,0.52), rgba(5,12,40,0.58)),
+        var(--tile-bg);
+      background-size: cover, cover;
+      background-position: center, center;
+      background-repeat: no-repeat;
+      color: rgba(0,229,255,0.88);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
-      text-shadow: 0 0 6px rgba(0,229,255,0.3);
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0,229,255,0.45);
+    }
+    .tile-num {
+      position: relative;
+      z-index: 1;
     }
     .tile::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
+      z-index: 1;
       background: linear-gradient(90deg, transparent, rgba(0,229,255,0.4), transparent);
     }
     .tile::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(0,229,255,0.08), transparent 70%);
+      z-index: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,229,255,0.1), transparent 70%);
       pointer-events: none;
     }
     .tile:not(.used):not(.selected):hover {
       border-color: rgba(0,229,255,0.55);
-      background: linear-gradient(145deg, rgba(0,229,255,0.15), rgba(41,121,255,0.12));
+      background-image:
+        linear-gradient(145deg, rgba(0,229,255,0.38), rgba(41,121,255,0.3)),
+        var(--tile-bg);
       color: #00e5ff;
       transform: scale(1.12) translateY(-2px);
       box-shadow: 0 0 18px rgba(0,229,255,0.35), 0 4px 16px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,229,255,0.06);
-      text-shadow: 0 0 12px rgba(0,229,255,0.6);
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0,229,255,0.75);
     }
     .tile.highlight {
       border-color: var(--accent-cyan);
-      background: linear-gradient(145deg, rgba(0,229,255,0.2), rgba(41,121,255,0.15));
+      background-image:
+        linear-gradient(145deg, rgba(0,229,255,0.48), rgba(41,121,255,0.34)),
+        var(--tile-bg);
       color: var(--accent-cyan);
       box-shadow: 0 0 24px rgba(0,229,255,0.45), inset 0 0 16px rgba(0,229,255,0.1);
-      text-shadow: 0 0 10px rgba(0,229,255,0.5);
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.88), 0 0 12px rgba(0,229,255,0.55);
     }
     .tile.selected {
       border-color: rgba(0,229,255,0.8);
-      background: linear-gradient(145deg, rgba(0,229,255,0.25), rgba(41,121,255,0.25));
+      background-image:
+        linear-gradient(145deg, rgba(0,229,255,0.42), rgba(41,121,255,0.4)),
+        var(--tile-bg);
       color: #fff;
       box-shadow: 0 0 35px rgba(0,229,255,0.6), 0 0 70px rgba(0,229,255,0.2), inset 0 0 20px rgba(0,229,255,0.15);
       transform: scale(1.18) translateY(-3px);
       z-index: 2;
       animation: tilePulse 1.2s ease infinite;
-      text-shadow: 0 0 15px rgba(0,229,255,0.8);
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.92), 0 0 16px rgba(0,229,255,0.85);
     }
     .tile.used {
       opacity: 0.12;
-      background: rgba(255,255,255,0.01);
+      background-image:
+        linear-gradient(145deg, rgba(5,12,40,0.88), rgba(5,12,40,0.92)),
+        var(--tile-bg);
       border-color: rgba(255,255,255,0.03);
       color: rgba(255,255,255,0.15);
       text-shadow: none;
@@ -1172,6 +1312,13 @@
                   background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
       position: relative;
     }
+    .rank-item--clickable {
+      cursor: pointer;
+    }
+    .rank-item--clickable:hover {
+      background: rgba(0, 229, 255, 0.06);
+      border-color: rgba(0, 229, 255, 0.2);
+    }
     .rank-item.active-team {
       border-color: rgba(0,229,255,0.15);
       background: rgba(0,229,255,0.04);
@@ -1519,12 +1666,9 @@
       </section>
 
       <section id="pageTypeSelect" class="page">
-        <div class="current-team-badge" id="typeBadge"></div>
-        <div class="page-title">选择题型</div>
-        <div class="page-subtitle">请选择本轮答题的题目类型</div>
-        <div class="type-grid" id="typeGrid"></div>
-        <div style="margin-top:22px">
-          <button class="btn-secondary" onclick="backToTeamSelect()">返回选择队伍</button>
+        <div class="type-select-row" id="typeSelectRow">
+          <div class="type-team-spot" id="typeTeamSpot"></div>
+          <div class="type-grid" id="typeGrid"></div>
         </div>
       </section>
 
@@ -1726,10 +1870,10 @@ const TEAM_CONFIG = [
 ];
 
 const TYPE_CONFIG = {
-  judge:     { name: '判断题', icon: '判', score: 5 },
-  single:    { name: '单选题', icon: '单', score: 10 },
-  multi:     { name: '多选题', icon: '多', score: 20 },
-  uncertain: { name: '不定项选择题', icon: '不', score: 30 }
+  judge:     { name: '判断题', icon: '判', img: 'img/判断题.jpg', tileImg: 'img/判断题型.jpg', score: 5 },
+  single:    { name: '单选题', icon: '单', img: 'img/单选题.jpg', tileImg: 'img/单选题型.jpg', score: 10 },
+  multi:     { name: '多选题', icon: '多', img: 'img/多选题.jpg', tileImg: 'img/多选题型.jpg', score: 20 },
+  uncertain: { name: '不定项选择题', icon: '不', img: 'img/不定项选择题.jpg', tileImg: 'img/不定项题型.jpg', score: 30 }
 };
 
 /* ============================================================
@@ -1864,11 +2008,44 @@ function showPage(name) {
   const map = { teamSelect: 'pageTeamSelect', typeSelect: 'pageTypeSelect', questionDraw: 'pageQuestionDraw', answer: 'pageAnswer', result: 'pageResult' };
   $(`#${map[name]}`).classList.add('active');
   state.currentPage = name;
+  renderRanking();
 }
 
 function makeTeamBadge(teamIdx) {
   const t = state.teams[teamIdx];
-  return `<span class="dot" style="background:${t.color}"></span> 当前答题：${t.name}`;
+  return `<span class="dot" style="background:${t.color}"></span>${t.name}`;
+}
+
+function renderTypeTeamCard(teamIdx, withEnterAnim) {
+  const t = state.teams[teamIdx];
+  if (!t) return '';
+  const mapPath = PROVINCE_SVG[t.abbr] || '';
+  const animClass = withEnterAnim ? ' type-team-card--enter' : '';
+  return `
+    <div class="type-team-card-shell${animClass}">
+      <div class="team-card-frame" style="--team-color:${t.color}">
+        <div class="team-card-frame-content">
+          <div class="team-card-zone team-card-zone--name">
+            <div class="team-card-header">
+              <div class="team-card-abbr">${t.abbr}</div>
+              <div class="team-card-subtitle">（${t.name}）</div>
+            </div>
+          </div>
+          <div class="team-card-zone team-card-zone--emblem">
+            <div class="team-card-logo">${t.abbr}</div>
+          </div>
+          <div class="team-card-zone team-card-zone--flag">
+            <div class="team-card-map-container">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${mapPath}</svg>
+            </div>
+          </div>
+        </div>
+        <div class="frame-corner frame-corner-tl"></div>
+        <div class="frame-corner frame-corner-tr"></div>
+        <div class="frame-corner frame-corner-bl"></div>
+        <div class="frame-corner frame-corner-br"></div>
+      </div>
+    </div>`;
 }
 
 function renderTeamGrid() {
@@ -1910,22 +2087,29 @@ function selectTeam(idx) {
   state.isSubmitted = false;
   state.settled = false;
   renderTypeGrid();
-  renderRanking();
   showPage('typeSelect');
 }
 
-function renderTypeGrid() {
-  $('#typeBadge').innerHTML = makeTeamBadge(state.currentTeamIdx);
+function renderTypeGrid(playTeamCardAnim) {
+  const spot = $('#typeTeamSpot');
+  if (spot) {
+    const wantAnim = playTeamCardAnim !== false;
+    spot.innerHTML = state.currentTeamIdx >= 0
+      ? renderTypeTeamCard(state.currentTeamIdx, wantAnim)
+      : '';
+  }
   const types = ['judge', 'single', 'multi', 'uncertain'];
   $('#typeGrid').innerHTML = types.map(type => {
     const cfg = TYPE_CONFIG[type];
     const remain = QUESTIONS[type].length - state.usedQuestions[type].size;
+    const cardStyle = cfg.img ? ` style="--type-card-art: url('${cfg.img}')"` : '';
     return `
-      <div class="type-card ${remain <= 0 ? 'disabled' : ''}" data-type="${type}" onclick="selectType('${type}')">
-        <div class="type-icon">${cfg.icon}</div>
-        <div class="type-name">${cfg.name}</div>
-        <div class="type-score">${cfg.score}分</div>
-        <div class="type-remain">剩余 ${remain} 题</div>
+      <div class="type-card ${remain <= 0 ? 'disabled' : ''}" data-type="${type}" onclick="selectType('${type}')"${cardStyle}>
+        <div class="type-info">
+          <div class="type-name">${cfg.name}</div>
+          <div class="type-score">${cfg.score}分</div>
+          <div class="type-remain">剩余 ${remain} 题</div>
+        </div>
       </div>
     `;
   }).join('');
@@ -1950,10 +2134,12 @@ function renderDrawPage() {
   $('#drawTitle').textContent = `题目抽选 - ${TYPE_CONFIG[state.currentType].name}`;
   state.drawSelectedTile = -1;
   const usedTiles = state.usedTiles[state.currentType];
+  const tileBg = TYPE_CONFIG[state.currentType].tileImg;
+  const tileBgCss = tileBg ? `url('${tileBg}')` : 'none';
   let html = '';
   for (let i = 1; i <= 50; i++) {
     const isUsed = usedTiles.has(i);
-    html += `<div class="tile ${isUsed ? 'used' : ''}" id="tile-${i}" ${isUsed ? '' : `onclick="selectTile(${i})"`}>${i}</div>`;
+    html += `<div class="tile ${isUsed ? 'used' : ''}" id="tile-${i}" style="--tile-bg: ${tileBgCss}" ${isUsed ? '' : `onclick="selectTile(${i})"`}><span class="tile-num">${i}</span></div>`;
   }
   $('#tileGrid').innerHTML = html;
 }
@@ -2201,9 +2387,8 @@ function settleScore() {
   animateRankingUpdate();
 }
 
-function nextRound() { renderTeamGrid(); renderRanking(); showPage('teamSelect'); }
-function backToTeamSelect() { state.currentTeamIdx = -1; renderTeamGrid(); renderRanking(); showPage('teamSelect'); }
-function backToTypeSelect() { renderTypeGrid(); showPage('typeSelect'); }
+function nextRound() { renderTeamGrid(); showPage('teamSelect'); }
+function backToTypeSelect() { renderTypeGrid(false); showPage('typeSelect'); }
 
 function renderRanking() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
@@ -2215,10 +2400,11 @@ function renderRanking() {
   $('#rankingList').innerHTML = sorted.map((t, i) => {
     const rc = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : 'normal';
     const ac = t.id === state.currentTeamIdx ? 'active-team' : '';
+    const clickCls = (state.currentPage === 'teamSelect' || state.currentPage === 'typeSelect') ? 'rank-item--clickable' : '';
     const trophy = trophySvg[i]
       ? `<div class="rank-trophy">${trophySvg[i]}</div>`
       : '<div class="rank-trophy rank-trophy--empty" aria-hidden="true"></div>';
-    return `<div class="rank-item ${ac}" data-team-id="${t.id}" style="order:${i}">
+    return `<div class="rank-item ${ac} ${clickCls}" data-team-id="${t.id}" style="order:${i}">
       <div class="rank-num ${rc}">${i+1}</div>
       ${trophy}
       <div class="rank-avatar" style="background:${t.color}">${t.abbr}</div>
@@ -2317,7 +2503,37 @@ function toggleFullscreen() {
 }
 document.addEventListener('fullscreenchange', () => { $('#btnFullscreen').textContent = document.fullscreenElement ? '退出全屏' : '全屏显示'; });
 
-function init() { renderTeamGrid(); renderRanking(); initQRCode(); }
+function onRankingTeamPick(teamId) {
+  if (state.currentPage === 'teamSelect') {
+    selectTeam(teamId);
+    return;
+  }
+  if (state.currentPage === 'typeSelect') {
+    if (teamId === state.currentTeamIdx) return;
+    state.currentTeamIdx = teamId;
+    state.selectedOptions = [];
+    state.isSubmitted = false;
+    state.settled = false;
+    renderTypeGrid(true);
+    renderRanking();
+  }
+}
+
+function init() {
+  renderTeamGrid();
+  renderRanking();
+  initQRCode();
+  const rk = $('#rankingList');
+  if (rk) {
+    rk.addEventListener('click', e => {
+      const row = e.target.closest('.rank-item');
+      if (!row || !row.classList.contains('rank-item--clickable')) return;
+      const id = +row.dataset.teamId;
+      if (Number.isNaN(id)) return;
+      onRankingTeamPick(id);
+    });
+  }
+}
 document.addEventListener('DOMContentLoaded', init);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" async onload="initQRCode()" onerror="console.log('QRCode library not available')"></script>
