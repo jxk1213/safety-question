@@ -154,9 +154,9 @@
       padding: 20px 28px 20px 36px;
       position: relative;
       z-index: 1;
-      /* 允许斜切省区卡、动效在横向略微越界，避免角被裁切 */
+      /* 横向：斜切省区卡可略越界；纵向：必须为 visible，否则队伍卡 hover 上移 + 大光晕会被裁切 */
       overflow-x: visible;
-      overflow-y: hidden;
+      overflow-y: visible;
     }
     .main-header {
       text-align: center;
@@ -327,11 +327,15 @@
     }
     /* 首页：单行卡片铺满主区域高度与宽度 */
     #pageTeamSelect.page {
+      /* 与题型页同理：为 hover translateY + 外发光保留顶部空间，避免被滚动/裁剪上下文切顶 */
+      --team-hover-bleed: clamp(56px, 10vmin, 120px);
       justify-content: flex-start;
       align-items: stretch;
       flex: 1;
       min-height: 0;
       width: 100%;
+      padding-top: var(--team-hover-bleed);
+      box-sizing: border-box;
     }
     #pageTeamSelect .team-grid {
       flex: 1;
@@ -340,6 +344,7 @@
       gap: clamp(8px, 1vw, 14px);
       padding: 6px 0 12px;
       align-items: stretch;
+      margin-top: calc(-1 * var(--team-hover-bleed));
     }
     #pageTeamSelect .team-card {
       min-height: 0;
@@ -590,10 +595,13 @@
 
     /* ===== Type Selection Page ===== */
     #pageTypeSelect.page {
+      /* 为卡片 hover 上移 + 外发光在 overflow-y:auto 下不被顶部裁切：padding 留出安全区，下行用负 margin 抵消布局位移 */
+      --type-hover-bleed: clamp(48px, 8vmin, 88px);
       justify-content: flex-start;
       overflow-y: auto;
       overflow-x: visible;
       min-height: 0;
+      padding-top: var(--type-hover-bleed);
       padding-bottom: 20px;
       /* 为 skew、入场动画 translateX 留出空间，避免在 overflow-y:auto 下横向被裁 */
       padding-left: clamp(24px, 4vw, 56px);
@@ -607,6 +615,7 @@
       gap: 28px;
       width: 100%;
       max-width: min(1520px, 100%);
+      margin-top: calc(-1 * var(--type-hover-bleed, 0px));
       perspective: 1200px;
       overflow: visible;
       position: relative;
@@ -801,15 +810,28 @@
     }
 
     /* ===== Question Draw Page ===== */
+    /* 题目抽选：去掉标题区后占满主区，必要时纵向滚动以看全格子 */
+    #pageQuestionDraw.page {
+      min-height: 0;
+      flex: 1;
+      justify-content: flex-start;
+      padding-top: 4px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     .draw-container {
       max-width: 100%;
       width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
     .tile-grid {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
       gap: 10px;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
     }
     .tile {
       --tile-bg: none;
@@ -818,13 +840,11 @@
       align-items: center;
       justify-content: center;
       border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
       cursor: pointer;
-      border: 1px solid rgba(0,229,255,0.18);
+      border: 2px solid rgba(0,229,255,0.38);
       background-color: transparent;
       background-image:
-        linear-gradient(145deg, rgba(8,20,60,0.52), rgba(5,12,40,0.58)),
+        linear-gradient(145deg, rgba(6,16,48,0.62), rgba(4,10,32,0.72)),
         var(--tile-bg);
       background-size: cover, cover;
       background-position: center, center;
@@ -833,11 +853,21 @@
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
-      text-shadow: 0 0 8px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0,229,255,0.45);
     }
     .tile-num {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+      font-size: clamp(18px, min(3.2vw, 3.6vh), 28px);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: #f4feff;
+      letter-spacing: -0.03em;
+      text-shadow:
+        0 0 2px rgba(0, 0, 0, 1),
+        0 1px 0 rgba(0, 0, 0, 0.92),
+        0 2px 6px rgba(0, 0, 0, 0.95),
+        0 0 14px rgba(0, 229, 255, 0.65);
     }
     .tile::before {
       content: '';
@@ -852,39 +882,55 @@
       position: absolute;
       inset: 0;
       z-index: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(0,229,255,0.1), transparent 70%);
+      background: radial-gradient(circle at 50% 0%, rgba(0,229,255,0.06), transparent 65%);
       pointer-events: none;
     }
     .tile:not(.used):not(.selected):hover {
-      border-color: rgba(0,229,255,0.55);
+      border-color: rgba(120,245,255,0.85);
       background-image:
-        linear-gradient(145deg, rgba(0,229,255,0.38), rgba(41,121,255,0.3)),
+        linear-gradient(145deg, rgba(0,229,255,0.32), rgba(41,121,255,0.28)),
         var(--tile-bg);
       color: #00e5ff;
       transform: scale(1.12) translateY(-2px);
-      box-shadow: 0 0 18px rgba(0,229,255,0.35), 0 4px 16px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,229,255,0.06);
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0,229,255,0.75);
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,0.45),
+        0 0 20px rgba(0,229,255,0.42),
+        0 4px 14px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(0,229,255,0.2);
+    }
+    .tile:not(.used):not(.selected):hover .tile-num {
+      color: #fff;
+      text-shadow:
+        0 0 2px rgba(0, 0, 0, 1),
+        0 1px 0 rgba(0, 0, 0, 0.92),
+        0 2px 8px rgba(0, 0, 0, 0.95),
+        0 0 16px rgba(0, 229, 255, 0.75);
     }
     .tile.highlight {
-      border-color: var(--accent-cyan);
+      border-color: #7ef8ff;
       background-image:
-        linear-gradient(145deg, rgba(0,229,255,0.48), rgba(41,121,255,0.34)),
+        linear-gradient(145deg, rgba(0,229,255,0.4), rgba(41,121,255,0.32)),
         var(--tile-bg);
       color: var(--accent-cyan);
-      box-shadow: 0 0 24px rgba(0,229,255,0.45), inset 0 0 16px rgba(0,229,255,0.1);
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.88), 0 0 12px rgba(0,229,255,0.55);
+      box-shadow:
+        0 0 0 2px rgba(0,229,255,0.55),
+        0 0 22px rgba(0,229,255,0.5),
+        inset 0 0 0 1px rgba(180,250,255,0.35);
     }
     .tile.selected {
-      border-color: rgba(0,229,255,0.8);
+      border-color: #b8ffff;
       background-image:
-        linear-gradient(145deg, rgba(0,229,255,0.42), rgba(41,121,255,0.4)),
+        linear-gradient(145deg, rgba(0,229,255,0.38), rgba(41,121,255,0.36)),
         var(--tile-bg);
       color: #fff;
-      box-shadow: 0 0 35px rgba(0,229,255,0.6), 0 0 70px rgba(0,229,255,0.2), inset 0 0 20px rgba(0,229,255,0.15);
+      box-shadow:
+        0 0 0 2px rgba(0,229,255,0.7),
+        0 0 28px rgba(0,229,255,0.65),
+        0 0 48px rgba(0,229,255,0.22),
+        inset 0 0 0 1px rgba(200,255,255,0.45);
       transform: scale(1.18) translateY(-3px);
       z-index: 2;
       animation: tilePulse 1.2s ease infinite;
-      text-shadow: 0 0 12px rgba(0, 0, 0, 0.92), 0 0 16px rgba(0,229,255,0.85);
     }
     .tile.used {
       opacity: 0.12;
@@ -893,12 +939,37 @@
         var(--tile-bg);
       border-color: rgba(255,255,255,0.03);
       color: rgba(255,255,255,0.15);
+    }
+    .tile.used .tile-num {
+      font-size: clamp(14px, min(2.4vw, 2.6vh), 20px);
+      color: rgba(255,255,255,0.22);
       text-shadow: none;
+    }
+    .tile.highlight .tile-num,
+    .tile.selected .tile-num {
+      color: #fff;
+      text-shadow:
+        0 0 2px rgba(0, 0, 0, 1),
+        0 1px 0 rgba(0, 0, 0, 0.92),
+        0 2px 8px rgba(0, 0, 0, 0.95),
+        0 0 18px rgba(0, 255, 255, 0.85);
     }
     .tile.used::before, .tile.used::after { display: none; }
     @keyframes tilePulse {
-      0%, 100% { box-shadow: 0 0 35px rgba(0,229,255,0.6), 0 0 70px rgba(0,229,255,0.2); }
-      50% { box-shadow: 0 0 50px rgba(0,229,255,0.8), 0 0 100px rgba(0,229,255,0.3); }
+      0%, 100% {
+        box-shadow:
+          0 0 0 2px rgba(0,229,255,0.65),
+          0 0 26px rgba(0,229,255,0.55),
+          0 0 44px rgba(0,229,255,0.2),
+          inset 0 0 0 1px rgba(200,255,255,0.4);
+      }
+      50% {
+        box-shadow:
+          0 0 0 2px rgba(0,255,255,0.85),
+          0 0 34px rgba(0,229,255,0.72),
+          0 0 56px rgba(0,229,255,0.28),
+          inset 0 0 0 1px rgba(220,255,255,0.55);
+      }
     }
 
     /* ===== Buttons ===== */
@@ -1382,8 +1453,9 @@
       font-size: 12px;
       font-weight: 500;
       line-height: 1.35;
-      word-break: keep-all;
-      overflow-wrap: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .rank-score {
       flex-shrink: 0;
@@ -1564,16 +1636,25 @@
     .tile:nth-child(7n) { animation-delay: 0.4s; }
     @keyframes tileFlicker {
       0% {
-        border-color: rgba(0,229,255,0.12);
-        box-shadow: 0 0 4px rgba(0,229,255,0.05), inset 0 0 4px rgba(0,229,255,0.02);
+        border-color: rgba(0,229,255,0.32);
+        box-shadow:
+          0 0 0 1px rgba(0,229,255,0.2),
+          0 0 8px rgba(0,229,255,0.18),
+          inset 0 0 0 1px rgba(0,229,255,0.08);
       }
       50% {
-        border-color: rgba(0,229,255,0.3);
-        box-shadow: 0 0 10px rgba(0,229,255,0.15), inset 0 0 8px rgba(0,229,255,0.04);
+        border-color: rgba(100,245,255,0.75);
+        box-shadow:
+          0 0 0 1px rgba(0,229,255,0.45),
+          0 0 16px rgba(0,229,255,0.38),
+          inset 0 0 0 1px rgba(0,229,255,0.22);
       }
       100% {
-        border-color: rgba(0,229,255,0.18);
-        box-shadow: 0 0 6px rgba(0,229,255,0.08), inset 0 0 4px rgba(0,229,255,0.02);
+        border-color: rgba(0,229,255,0.42);
+        box-shadow:
+          0 0 0 1px rgba(0,229,255,0.28),
+          0 0 11px rgba(0,229,255,0.26),
+          inset 0 0 0 1px rgba(0,229,255,0.12);
       }
     }
 
@@ -1673,9 +1754,6 @@
       </section>
 
       <section id="pageQuestionDraw" class="page">
-        <div class="current-team-badge" id="drawBadge"></div>
-        <div class="page-title" id="drawTitle">题目抽选</div>
-        <div class="page-subtitle">请点击下方格子选择一道题目，点击即开始答题</div>
         <div class="draw-container">
           <div class="tile-grid" id="tileGrid"></div>
           <div style="text-align:center; display:flex; justify-content:center; gap:14px; margin-top:8px">
@@ -2130,8 +2208,6 @@ function selectType(type) {
 }
 
 function renderDrawPage() {
-  $('#drawBadge').innerHTML = makeTeamBadge(state.currentTeamIdx);
-  $('#drawTitle').textContent = `题目抽选 - ${TYPE_CONFIG[state.currentType].name}`;
   state.drawSelectedTile = -1;
   const usedTiles = state.usedTiles[state.currentType];
   const tileBg = TYPE_CONFIG[state.currentType].tileImg;
