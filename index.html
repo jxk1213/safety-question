@@ -297,22 +297,41 @@
     .current-team-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 22px;
-      border-radius: 20px;
-      border: 1px solid rgba(0,229,255,0.2);
-      background: rgba(0,229,255,0.06);
+      gap: 12px;
+      min-width: 220px;
+      padding: 8px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,229,255,0.26);
+      background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(41,121,255,0.08));
       backdrop-filter: blur(10px);
-      font-size: 14px;
-      color: var(--accent-cyan);
+      color: #b8f9ff;
       margin-bottom: 20px;
-      box-shadow: 0 0 20px rgba(0,229,255,0.05);
+      box-shadow: 0 0 20px rgba(0,229,255,0.08), inset 0 0 16px rgba(0,229,255,0.05);
     }
-    .current-team-badge .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 8px currentColor;
+    .current-team-badge .emblem-slot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px dashed rgba(0,229,255,0.45);
+      background: rgba(3, 20, 56, 0.75);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 8px rgba(0,229,255,0.45);
+      box-shadow: inset 0 0 12px rgba(0,229,255,0.15);
+      flex-shrink: 0;
+    }
+    .current-team-badge .team-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #e8fbff;
+      text-shadow: 0 0 12px rgba(0,229,255,0.38);
+      line-height: 1;
     }
 
     /* ===== Team Selection Page (Slanted Frame Design) ===== */
@@ -461,6 +480,227 @@
     .team-card:hover .team-card-frame::after {
       background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 1), transparent);
       box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+    }
+
+    /* ===== 队伍排名页（与首页同款省区卡 + 得分 + 冠亚季军边框）===== */
+    #pageRanking.page {
+      --team-hover-bleed: clamp(40px, 8vmin, 96px);
+      justify-content: flex-start;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      padding-top: var(--team-hover-bleed);
+      box-sizing: border-box;
+    }
+    .ranking-page-inner {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      margin-top: calc(-1 * var(--team-hover-bleed));
+      padding-bottom: 12px;
+    }
+    .ranking-page-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      padding: 0 4px 16px;
+      gap: 16px;
+    }
+    .ranking-page-toolbar .page-title {
+      margin-bottom: 0;
+      letter-spacing: 6px;
+    }
+    #pageRanking .ranking-team-grid {
+      flex: 1;
+      min-height: 0;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      /* 与首页 #pageTeamSelect .team-grid 相同间距 */
+      gap: clamp(8px, 1vw, 14px);
+      padding: 6px 0 12px;
+      align-items: stretch;
+    }
+    #pageRanking .team-card {
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    #pageRanking .team-card-frame {
+      flex: 1;
+      min-height: 0;
+      aspect-ratio: unset;
+      height: auto;
+    }
+    /* 与首页省区卡内边距、字号一致，仅多一行得分 */
+    #pageRanking .team-card-frame-content {
+      padding: clamp(14px, 2.2vmin, 28px) clamp(8px, 1.2vmin, 14px);
+    }
+    #pageRanking .team-card-header {
+      width: 100%;
+    }
+    #pageRanking .team-card-abbr {
+      font-size: clamp(18px, 2.4vmin, 36px);
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    #pageRanking .team-card-zone--emblem .team-card-logo {
+      width: min(80cqmin, 100%);
+      height: min(80cqmin, 100%);
+      font-size: clamp(16px, 24cqmin, 40px);
+    }
+    #pageRanking .team-card-zone--flag .team-card-map-container {
+      width: min(94cqmin, 100%);
+      height: min(94cqmin, 100%);
+    }
+    #pageRanking .frame-corner {
+      width: clamp(12px, 1.4vmin, 16px);
+      height: clamp(12px, 1.4vmin, 16px);
+    }
+    .team-card-rank-score {
+      margin-top: clamp(8px, 1.2vmin, 14px);
+      font-size: clamp(12px, 1.5vmin, 20px);
+      font-weight: 800;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 12px rgba(0, 229, 255, 0.42);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    .team-card-frame--gold .team-card-rank-score {
+      color: #ffe566;
+      text-shadow: 0 0 14px rgba(255, 215, 0, 0.55);
+    }
+    .team-card-frame--silver .team-card-rank-score {
+      color: #e8ecf5;
+      text-shadow: 0 0 12px rgba(200, 210, 230, 0.55);
+    }
+    .team-card-frame--bronze .team-card-rank-score {
+      color: #f0c090;
+      text-shadow: 0 0 12px rgba(205, 127, 50, 0.45);
+    }
+    .team-card.team-card--ranking {
+      cursor: default;
+      pointer-events: none;
+    }
+    .team-card.team-card--ranking:hover {
+      transform: none;
+      z-index: 1;
+    }
+    .team-card-frame--gold {
+      border-width: 3px;
+      border-color: #ffefc2 #ffd700 #c9a227 #ffe44d;
+      box-shadow:
+        0 0 0 1px rgba(255, 223, 120, 0.35),
+        0 0 22px rgba(255, 215, 0, 0.5),
+        0 0 52px rgba(255, 180, 0, 0.22),
+        inset 0 0 26px rgba(255, 215, 0, 0.12);
+      animation: medalGlowGold 2.4s ease-in-out infinite;
+    }
+    .team-card-frame--silver {
+      border-width: 3px;
+      border-color: #f8fafc #d0d6e2 #8a929e #eef2f8;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.22),
+        0 0 20px rgba(200, 210, 230, 0.55),
+        0 0 46px rgba(130, 150, 185, 0.22),
+        inset 0 0 24px rgba(255, 255, 255, 0.09);
+      animation: medalGlowSilver 2.4s ease-in-out infinite;
+    }
+    .team-card-frame--bronze {
+      border-width: 3px;
+      border-color: #e8a066 #cd7f32 #6b3f16 #d4a574;
+      box-shadow:
+        0 0 0 1px rgba(205, 127, 50, 0.38),
+        0 0 20px rgba(205, 127, 50, 0.48),
+        0 0 46px rgba(100, 50, 20, 0.2),
+        inset 0 0 24px rgba(205, 127, 50, 0.11);
+      animation: medalGlowBronze 2.4s ease-in-out infinite;
+    }
+    @keyframes medalGlowGold {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1px rgba(255, 223, 120, 0.35),
+          0 0 22px rgba(255, 215, 0, 0.5),
+          0 0 52px rgba(255, 180, 0, 0.22),
+          inset 0 0 26px rgba(255, 215, 0, 0.12);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(255, 240, 180, 0.5),
+          0 0 30px rgba(255, 220, 80, 0.65),
+          0 0 72px rgba(255, 190, 40, 0.28),
+          inset 0 0 32px rgba(255, 230, 120, 0.16);
+      }
+    }
+    @keyframes medalGlowSilver {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.22),
+          0 0 20px rgba(200, 210, 230, 0.55),
+          0 0 46px rgba(130, 150, 185, 0.22),
+          inset 0 0 24px rgba(255, 255, 255, 0.09);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.35),
+          0 0 28px rgba(220, 228, 245, 0.7),
+          0 0 58px rgba(160, 175, 210, 0.3),
+          inset 0 0 30px rgba(255, 255, 255, 0.14);
+      }
+    }
+    @keyframes medalGlowBronze {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1px rgba(205, 127, 50, 0.38),
+          0 0 20px rgba(205, 127, 50, 0.48),
+          0 0 46px rgba(100, 50, 20, 0.2),
+          inset 0 0 24px rgba(205, 127, 50, 0.11);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(232, 160, 102, 0.5),
+          0 0 28px rgba(210, 120, 50, 0.62),
+          0 0 60px rgba(120, 55, 20, 0.26),
+          inset 0 0 30px rgba(230, 150, 80, 0.16);
+      }
+    }
+    #pageRanking .team-card--ranking:hover .team-card-frame.team-card-frame--gold {
+      transform: skewX(-3deg);
+      animation: medalGlowGold 2.4s ease-in-out infinite;
+      border-color: #ffefc2 #ffd700 #c9a227 #ffe44d;
+      background: linear-gradient(180deg, rgba(55, 42, 8, 0.42) 0%, rgba(8, 14, 42, 0.9) 42%, rgba(5, 12, 40, 0.92) 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 223, 120, 0.45),
+        0 0 26px rgba(255, 215, 0, 0.58),
+        0 0 60px rgba(255, 180, 0, 0.26),
+        inset 0 0 28px rgba(255, 215, 0, 0.14);
+    }
+    #pageRanking .team-card--ranking:hover .team-card-frame.team-card-frame--silver {
+      transform: skewX(-3deg);
+      animation: medalGlowSilver 2.4s ease-in-out infinite;
+      border-color: #f8fafc #d0d6e2 #8a929e #eef2f8;
+      background: linear-gradient(180deg, rgba(38, 44, 58, 0.45) 0%, rgba(8, 14, 42, 0.9) 42%, rgba(5, 12, 40, 0.92) 100%);
+    }
+    #pageRanking .team-card--ranking:hover .team-card-frame.team-card-frame--bronze {
+      transform: skewX(-3deg);
+      animation: medalGlowBronze 2.4s ease-in-out infinite;
+      border-color: #e8a066 #cd7f32 #6b3f16 #d4a574;
+      background: linear-gradient(180deg, rgba(48, 28, 12, 0.42) 0%, rgba(8, 14, 42, 0.9) 42%, rgba(5, 12, 40, 0.92) 100%);
+    }
+    #pageRanking .team-card--ranking:hover .team-card-frame:not(.team-card-frame--gold):not(.team-card-frame--silver):not(.team-card-frame--bronze) {
+      transform: skewX(-3deg);
+      animation: none;
+      border-color: rgba(0, 229, 255, 0.42);
+      background: linear-gradient(180deg, rgba(10, 20, 60, 0.65) 0%, rgba(5, 12, 40, 0.88) 100%);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.18);
+    }
+    #pageRanking .team-card--ranking:hover .team-card-frame::after {
+      opacity: 0.85;
     }
 
     .team-card-frame-content {
@@ -1044,21 +1284,24 @@
       margin-bottom: 20px;
     }
     .question-type-tag {
-      padding: 5px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 1px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      line-height: 1;
       backdrop-filter: blur(10px);
+      box-shadow: 0 0 16px rgba(0,229,255,0.12), inset 0 0 10px rgba(255,255,255,0.05);
+      white-space: nowrap;
     }
     .timer-container {
       position: relative;
-      width: 88px; height: 88px;
+      width: 120px; height: 120px;
     }
     .timer-ring {
-      width: 88px; height: 88px;
+      width: 120px; height: 120px;
       transform: rotate(-90deg);
-      filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));
+      filter: drop-shadow(0 0 12px rgba(0,229,255,0.4));
     }
     .timer-ring-bg {
       fill: none;
@@ -1079,12 +1322,15 @@
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 28px;
+      font-size: 50px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: #d9fcff;
+      text-shadow: 0 0 16px rgba(0,229,255,0.45);
     }
-    .timer-text.warning { color: var(--warning); text-shadow: 0 0 10px rgba(255,171,64,0.3); }
-    .timer-text.danger { color: var(--danger); text-shadow: 0 0 10px rgba(255,82,82,0.3); animation: timerPulse 0.5s ease infinite; }
+    .timer-text.warning { color: var(--warning); text-shadow: 0 0 14px rgba(255,171,64,0.35); }
+    .timer-text.danger { color: var(--danger); text-shadow: 0 0 16px rgba(255,82,82,0.6); animation: timerPulse 0.5s ease infinite; }
     @keyframes timerPulse {
       0%, 100% { transform: translate(-50%, -50%) scale(1); }
       50% { transform: translate(-50%, -50%) scale(1.12); }
@@ -1595,6 +1841,35 @@
       box-shadow: 0 0 12px rgba(0,229,255,0.1);
     }
 
+    .btn-view-ranking {
+      display: none;
+      position: fixed;
+      z-index: 50;
+      bottom: 22px;
+      right: calc(var(--sidebar-width) + 20px);
+      padding: 8px 20px;
+      border: 1px solid rgba(0, 229, 255, 0.32);
+      border-radius: 8px;
+      background: rgba(5, 10, 32, 0.88);
+      backdrop-filter: blur(12px);
+      color: var(--accent-cyan);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.14);
+    }
+    /* 仅在答题结果页显示「查看排名」 */
+    #app:has(#pageResult.active) .btn-view-ranking {
+      display: inline-block;
+    }
+    .btn-view-ranking:hover {
+      border-color: rgba(0, 229, 255, 0.55);
+      color: #d9fcff;
+      box-shadow: 0 0 32px rgba(0, 229, 255, 0.24);
+    }
+
     /* ===== Data Stream Decoration (sidebar) ===== */
     .data-stream {
       position: absolute;
@@ -2011,6 +2286,16 @@
           </div>
         </div>
       </section>
+
+      <section id="pageRanking" class="page">
+        <div class="ranking-page-inner">
+          <div class="ranking-page-toolbar">
+            <h2 class="page-title">队伍排名</h2>
+            <button type="button" class="btn-secondary" onclick="closeRankingPage()">返回</button>
+          </div>
+          <div class="team-grid ranking-team-grid" id="rankingTeamGrid"></div>
+        </div>
+      </section>
     </main>
 
     <aside class="sidebar">
@@ -2024,6 +2309,7 @@
     </aside>
 
     <button class="btn-fullscreen" onclick="toggleFullscreen()" id="btnFullscreen">全屏显示</button>
+    <button type="button" class="btn-view-ranking" id="btnViewRanking" onclick="openRankingPage()">查看排名</button>
 
     
   </div>
@@ -2377,6 +2663,7 @@ const QUESTIONS = {
    ============================================================ */
 const state = {
   currentPage: 'teamSelect',
+  rankingReturnPage: 'teamSelect',
   currentTeamIdx: -1,
   currentType: null,
   currentQuestion: null,
@@ -2760,16 +3047,63 @@ function initMobileMode() {
 
 function showPage(name) {
   $$('.page').forEach(p => p.classList.remove('active'));
-  const map = { teamSelect: 'pageTeamSelect', typeSelect: 'pageTypeSelect', questionDraw: 'pageQuestionDraw', answer: 'pageAnswer', result: 'pageResult' };
+  const map = { teamSelect: 'pageTeamSelect', typeSelect: 'pageTypeSelect', questionDraw: 'pageQuestionDraw', answer: 'pageAnswer', result: 'pageResult', ranking: 'pageRanking' };
   $(`#${map[name]}`).classList.add('active');
   state.currentPage = name;
   renderRanking();
   broadcastHostState();
 }
 
+function renderRankingPage() {
+  const grid = $('#rankingTeamGrid');
+  if (!grid) return;
+  const sorted = [...state.teams].sort((a, b) => b.score - a.score);
+  grid.innerHTML = sorted.map((t, rankIdx) => {
+    const medalClass = rankIdx === 0 ? 'team-card-frame--gold' : rankIdx === 1 ? 'team-card-frame--silver' : rankIdx === 2 ? 'team-card-frame--bronze' : '';
+    const mapPath = PROVINCE_SVG[t.abbr] || '';
+    return `
+    <div class="team-card team-card--ranking">
+      <div class="team-card-frame ${medalClass}" style="--team-color:${t.color}">
+        <div class="team-card-frame-content">
+          <div class="team-card-zone team-card-zone--name">
+            <div class="team-card-header">
+              <div class="team-card-abbr">${t.name}</div>
+            </div>
+            <div class="team-card-rank-score">得分 ${t.score}</div>
+          </div>
+          <div class="team-card-zone team-card-zone--emblem">
+            <div class="team-card-logo">${t.abbr}</div>
+          </div>
+          <div class="team-card-zone team-card-zone--flag">
+            <div class="team-card-map-container">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${mapPath}</svg>
+            </div>
+          </div>
+        </div>
+        <div class="frame-corner frame-corner-tl"></div>
+        <div class="frame-corner frame-corner-tr"></div>
+        <div class="frame-corner frame-corner-bl"></div>
+        <div class="frame-corner frame-corner-br"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openRankingPage() {
+  state.rankingReturnPage = state.currentPage;
+  renderRankingPage();
+  showPage('ranking');
+}
+
+function closeRankingPage() {
+  let back = state.rankingReturnPage;
+  if (!back || back === 'ranking') back = 'teamSelect';
+  showPage(back);
+}
+
 function makeTeamBadge(teamIdx) {
   const t = state.teams[teamIdx];
-  return `<span class="dot" style="background:${t.color}"></span>${t.name}`;
+  return `<span class="emblem-slot" style="border-color:${t.color}88;color:${t.color}">${t.abbr}</span><span class="team-name">${t.name}</span>`;
 }
 
 function renderTypeTeamCard(teamIdx, withEnterAnim) {
@@ -2986,8 +3320,7 @@ function updateTimerUI() {
   const text = $('#timerText');
   text.textContent = t;
   text.classList.remove('warning', 'danger');
-  if (t <= 5) { circle.classList.add('danger'); text.classList.add('danger'); }
-  else if (t <= 10) { circle.classList.add('warning'); text.classList.add('warning'); }
+  if (t <= 10) { circle.classList.add('danger'); text.classList.add('danger'); }
   broadcastHostState();
 }
 
@@ -3226,6 +3559,7 @@ function animateRankingUpdate() {
       setTimeout(() => ch.classList.remove('show'), 3000);
     }
   });
+  if (state.currentPage === 'ranking') renderRankingPage();
 }
 
 let qrResizeObserver = null;
