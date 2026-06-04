@@ -29,7 +29,7 @@
       --sidebar-width: max(168px, calc(100vw / 6));
       /* 与首页 .team-grid 单列卡片一致：列宽 + 行高（主区留白与首页队伍区相同算法） */
       --team-grid-gap: clamp(8px, 1vw, 14px);
-      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - 7 * var(--team-grid-gap)) / 8);
+      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - 8 * var(--team-grid-gap)) / 9);
       /* 100vh − 主区上下 padding(40) − 标题区(~100) − 首页队伍网格上下 padding(18) − 额外余量以防被底部遮挡 */
       --home-team-card-height: calc(100vh - 180px);
       --glow-cyan: 0 0 20px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.05);
@@ -337,7 +337,7 @@
     /* ===== Team Selection Page (Slanted Frame Design) ===== */
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(8, 1fr);
+      grid-template-columns: repeat(9, 1fr);
       gap: 14px;
       max-width: 100%;
       width: 100%;
@@ -3032,7 +3032,7 @@
         <h1>AI申通 AI安全</h1>
         <div class="subtitle">安全生产月安全知识竞答</div>
         <div class="header-metrics">
-          <div class="header-chip"><b>8</b><span>省区战队</span></div>
+          <div class="header-chip"><b>9</b><span>省区战队</span></div>
           <div class="header-chip"><b>AI</b><span>安全竞赛</span></div>
           <div class="header-chip"><b>30s</b><span>限时作答</span></div>
         </div>
@@ -3361,15 +3361,15 @@ const PROVINCE_SVG = {
 };
 
 const TEAM_CONFIG = [
-  { name: '浙江省区', abbr: '浙', color: '#f06292' },
-  { name: '江苏省区', abbr: '苏', color: '#ff8a65' },
-  { name: '广东省区', abbr: '粤', color: '#ffd54f' },
-  { name: '山东省区', abbr: '鲁', color: '#81c784' },
-  { name: '河南省区', abbr: '豫', color: '#4fc3f7' },
-  { name: '四川省区', abbr: '川', color: '#b39ddb' },
-  { name: '湖北省区', abbr: '鄂', color: '#4dd0e1' },
-  { name: '北京省区', abbr: '京', color: '#a1887f' },
-  { name: '观众队',   abbr: '众', color: '#90a4ae' }
+  { name: '东北省区', abbr: '东', color: '#f06292', logo: '知识竞答分组/第1组/东北+东北安.png', teamName: '东北安队' },
+  { name: '京津冀业务区', abbr: '京', color: '#ff8a65', logo: '知识竞答分组/第1组/京津冀业务区+京安队.png', teamName: '京安队' },
+  { name: '川藏省区', abbr: '川', color: '#ffd54f', logo: '知识竞答分组/第1组/川藏+食铁兽.png', teamName: '食铁兽队' },
+  { name: '广州一级分拨', abbr: '粤', color: '#81c784', logo: '知识竞答分组/第1组/广州一级分拨+破穗先锋队.png', teamName: '破穗先锋队' },
+  { name: '浙江省区', abbr: '浙', color: '#4fc3f7', logo: '知识竞答分组/第1组/浙江+浙里安全 2.0.png', teamName: '浙里安全队' },
+  { name: '浙江业务区', abbr: '浙', color: '#b39ddb', logo: '知识竞答分组/第1组/浙江业务区+浙江安全先锋队.png', teamName: '浙江安全先锋队' },
+  { name: '湖北省区', abbr: '鄂', color: '#4dd0e1', logo: '知识竞答分组/第1组/湖北+楚安先锋队.png', teamName: '楚安先锋队' },
+  { name: '湖南省区', abbr: '湘', color: '#a1887f', logo: '知识竞答分组/第1组/湖南+潇湘护卫队.png', teamName: '潇湘护卫队' },
+  { name: '福建业务区', abbr: '闽', color: '#90a4ae', logo: '知识竞答分组/第1组/福建业务区+福建平安先锋队.png', teamName: '福建平安先锋队' }
 ];
 
 const TYPE_CONFIG = {
@@ -3897,11 +3897,11 @@ function renderRankingPage() {
             <div class="team-card-rank-score">得分 ${t.score}</div>
           </div>
           <div class="team-card-zone team-card-zone--emblem">
-            <div class="team-card-logo">${t.abbr}</div>
+            <img src="${t.logo}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; max-width: 120px; max-height: 120px;" />
           </div>
-          <div class="team-card-zone team-card-zone--flag">
-            <div class="team-card-map-container">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${mapPath}</svg>
+          <div class="team-card-zone team-card-zone--flag" style="display: flex; align-items: center; justify-content: center;">
+            <div style="writing-mode: vertical-rl; text-orientation: upright; display: flex; justify-content: space-between; height: 160px; font-size: 22px; font-weight: bold; color: var(--text-primary); text-shadow: 0 0 10px rgba(0,229,255,0.5);">
+              ${t.teamName.split('').map(c => `<span>${c}</span>`).join('')}
             </div>
           </div>
         </div>
@@ -3942,16 +3942,15 @@ function renderTypeTeamCard(teamIdx, withEnterAnim) {
         <div class="team-card-frame-content">
           <div class="team-card-zone team-card-zone--name">
             <div class="team-card-header">
-              <div class="team-card-abbr">${t.abbr}</div>
-              <div class="team-card-subtitle">（${t.name}）</div>
+              <div class="team-card-abbr" style="font-size: 16px;">${t.name}</div>
             </div>
           </div>
           <div class="team-card-zone team-card-zone--emblem">
-            <div class="team-card-logo">${t.abbr}</div>
+            <img src="${t.logo}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; max-width: 120px; max-height: 120px;" />
           </div>
-          <div class="team-card-zone team-card-zone--flag">
-            <div class="team-card-map-container">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${mapPath}</svg>
+          <div class="team-card-zone team-card-zone--flag" style="display: flex; align-items: center; justify-content: center;">
+            <div style="writing-mode: vertical-rl; text-orientation: upright; display: flex; justify-content: space-between; height: 160px; font-size: 22px; font-weight: bold; color: var(--text-primary); text-shadow: 0 0 10px rgba(0,229,255,0.5);">
+              ${t.teamName.split('').map(c => `<span>${c}</span>`).join('')}
             </div>
           </div>
         </div>
@@ -3965,7 +3964,7 @@ function renderTypeTeamCard(teamIdx, withEnterAnim) {
 
 function renderTeamGrid() {
   const grid = $('#teamGrid');
-  grid.innerHTML = state.teams.slice(0, 8).map((t, i) => {
+  grid.innerHTML = state.teams.map((t, i) => {
     const mapPath = PROVINCE_SVG[t.abbr] || '';
     return `
     <div class="team-card" onclick="selectTeam(${i})">
@@ -3973,16 +3972,15 @@ function renderTeamGrid() {
         <div class="team-card-frame-content">
           <div class="team-card-zone team-card-zone--name">
             <div class="team-card-header">
-              <div class="team-card-abbr">${t.abbr}</div>
-              <div class="team-card-subtitle">（${t.name}）</div>
+              <div class="team-card-abbr" style="font-size: 16px;">${t.name}</div>
             </div>
           </div>
           <div class="team-card-zone team-card-zone--emblem">
-            <div class="team-card-logo">${t.abbr}</div>
+            <img src="${t.logo}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; max-width: 120px; max-height: 120px;" />
           </div>
-          <div class="team-card-zone team-card-zone--flag">
-            <div class="team-card-map-container">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${mapPath}</svg>
+          <div class="team-card-zone team-card-zone--flag" style="display: flex; align-items: center; justify-content: center;">
+            <div style="writing-mode: vertical-rl; text-orientation: upright; display: flex; justify-content: space-between; height: 160px; font-size: 22px; font-weight: bold; color: var(--text-primary); text-shadow: 0 0 10px rgba(0,229,255,0.5);">
+              ${t.teamName.split('').map(c => `<span>${c}</span>`).join('')}
             </div>
           </div>
         </div>
@@ -4358,7 +4356,7 @@ function renderRanking() {
     return `<div class="rank-item ${ac} ${clickCls}" data-team-id="${t.id}" style="order:${i}">
       <div class="rank-num ${rc}">${i+1}</div>
       ${trophy}
-      <div class="rank-avatar" style="background:${t.color}">${t.abbr}</div>
+      <div class="rank-avatar" style="background:${t.color}; padding: 2px;"><img src="${t.logo}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 6px;" /></div>
       <div class="rank-name">${t.name}</div>
       <div class="rank-score">${t.score}</div>
       <div class="rank-change"></div>
