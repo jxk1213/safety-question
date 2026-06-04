@@ -951,102 +951,137 @@
       z-index: 1;
     }
     .type-card {
-      --type-card-art: none;
-      background: rgba(6, 10, 28, 0.95);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 20px;
-      padding: 22px 22px 36px;
+      background: transparent;
+      border: none;
+      border-radius: 24px;
+      padding: 32px 24px;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       height: 100%;
-      isolation: isolate;
     }
-    /* 题型整卡背景图 + 自上而下罩层，底部加深保证文案可读 */
-    .type-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      z-index: 0;
-      pointer-events: none;
-      background-color: #0a1430;
-      background-image:
-        linear-gradient(180deg,
-          rgba(4, 8, 22, 0.06) 0%,
-          rgba(4, 8, 22, 0.12) 32%,
-          rgba(4, 8, 22, 0.48) 68%,
-          rgba(4, 8, 22, 0.88) 100%),
-        var(--type-card-art);
-      background-size: cover, cover;
-      background-position: center center, center center;
-      background-repeat: no-repeat;
-      filter: brightness(1.14) contrast(1.08) saturate(1.06);
-      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
-      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.18);
-    }
-    .type-card[data-type="single"]::after {
-      background-position: center center, center 52%;
-    }
+
     .type-card::before {
       content: '';
       position: absolute;
-      inset: 0;
-      z-index: 1;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.1), transparent 60%);
       pointer-events: none;
-      background: radial-gradient(circle at 50% 28%, rgba(0,229,255,0.16), transparent 55%);
-      opacity: 0;
+      z-index: 0;
+      opacity: 0.6;
       transition: opacity 0.4s ease;
     }
+
     .type-card:hover {
-      border-color: rgba(0,229,255,0.3);
-      transform: translateY(-8px);
-      box-shadow: var(--glow-cyan-strong);
+      transform: translateY(-12px);
     }
-    .type-card:hover::before { opacity: 1; }
+
+    .type-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: var(--type-card-art);
+      background-size: 100% auto;
+      background-position: top center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.95;
+      transition: all 0.4s ease;
+    }
+
     .type-card:hover::after {
-      filter: brightness(1.22) contrast(1.1) saturate(1.08);
+      transform: scale(1.03);
+      opacity: 1;
     }
-    .type-card:hover::after { transform: scale(1.045); }
+
+    .type-card:hover::before {
+      opacity: 1;
+    }
+
     .type-card .type-info {
-      flex-shrink: 0;
-      width: 100%;
       position: relative;
       z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100%;
     }
-    .type-card .type-name {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
-    }
-    .type-card .type-score {
-      font-size: 42px;
+
+    .type-card .type-sigil {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 119, 255, 0.05));
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      color: #00e5ff;
+      font-size: 36px;
       font-weight: 900;
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      margin-bottom: 24px;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.15), inset 0 0 15px rgba(0, 229, 255, 0.2);
+      transition: all 0.4s ease;
+    }
+
+    .type-card:hover .type-sigil {
+      transform: scale(1.1) translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.3);
+      color: #fff;
+      text-shadow: 0 0 12px rgba(0, 229, 255, 0.9);
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(0, 119, 255, 0.2));
+    }
+
+    .type-card .type-name {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: #fff;
+      margin-bottom: auto;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .type-card .type-score {
+      font-size: 64px;
+      font-weight: 900;
+      background: linear-gradient(180deg, #ffffff, #00e5ff);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       background-clip: text;
-      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85));
-      margin-bottom: 12px;
+      -webkit-text-fill-color: transparent;
+      margin: 24px 0 16px 0;
+      filter: drop-shadow(0 4px 16px rgba(0, 229, 255, 0.4));
+      line-height: 1;
     }
+
     .type-card .type-remain {
-      font-size: 15px;
-      color: rgba(230, 238, 255, 0.88);
-      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+      font-size: 16px;
+      font-weight: 700;
+      color: #b3e5fc;
+      background: rgba(0, 229, 255, 0.1);
+      padding: 8px 20px;
+      border-radius: 30px;
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      transition: all 0.3s ease;
     }
+
+    .type-card:hover .type-remain {
+      background: rgba(0, 229, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+    }
+
     .type-card.disabled {
-      opacity: 0.3;
+      opacity: 0.4;
       pointer-events: none;
-      filter: grayscale(0.5);
+      filter: grayscale(0.8) brightness(0.7);
     }
 
     /* ===== Question Draw Page ===== */
@@ -2317,81 +2352,7 @@
     .type-grid {
       gap: clamp(14px, 1.6vw, 28px);
     }
-    .type-card {
-      padding: 22px;
-      border: 1px solid rgba(39,244,255,0.2);
-      background: rgba(5, 10, 10, 0.96);
-      justify-content: space-between;
-      text-align: left;
-      min-width: 0;
-    }
-    .type-card::after {
-      background-image:
-        linear-gradient(180deg, rgba(5,7,6,0.05), rgba(5,7,6,0.5) 55%, rgba(5,7,6,0.94) 100%),
-        linear-gradient(115deg, transparent 0 53%, rgba(39,244,255,0.16) 53% 54%, transparent 54%),
-        var(--type-card-art);
-      background-size: cover, cover, cover;
-      filter: brightness(1.04) contrast(1.1) saturate(1.08);
-    }
-    .type-card::before {
-      background:
-        linear-gradient(90deg, transparent, rgba(39,244,255,0.22), transparent),
-        linear-gradient(145deg, rgba(141,255,130,0.12), transparent 44%);
-      opacity: 0.45;
-    }
-    .type-card:hover {
-      border-color: rgba(39,244,255,0.72);
-      transform: translateY(-8px);
-      box-shadow: var(--glow-cyan-strong);
-    }
-    .type-card .type-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      min-height: 100%;
-    }
-    .type-sigil {
-      align-self: start;
-      justify-self: start;
-      width: 58px;
-      height: 58px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 8px;
-      background: linear-gradient(145deg, rgba(39,244,255,0.22), rgba(255,77,100,0.1));
-      color: #f7fffc;
-      font-size: 30px;
-      font-weight: 950;
-      box-shadow: inset 0 0 22px rgba(39,244,255,0.12);
-      margin-bottom: auto;
-    }
-    .type-card .type-name {
-      font-size: clamp(22px, 1.7vw, 32px);
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
-    .type-card .type-score {
-      font-size: clamp(44px, 4.2vw, 74px);
-      line-height: 0.95;
-      background: linear-gradient(90deg, #27f4ff, #ffd166 62%, #ff4d64);
-      -webkit-background-clip: text;
-      background-clip: text;
-    }
-    .type-card .type-remain {
-      display: inline-flex;
-      width: max-content;
-      max-width: 100%;
-      margin-top: 8px;
-      padding: 6px 10px;
-      border: 1px solid rgba(39,244,255,0.22);
-      background: rgba(39,244,255,0.08);
-      color: #cce8e4;
-      border-radius: 8px;
-      font-weight: 700;
-    }
+    /* type-card redundant styles removed for clean unified design */
 
     #pageQuestionDraw.page {
       padding-top: 0;
@@ -3403,10 +3364,10 @@ const TEAM_CONFIG = [
 ];
 
 const TYPE_CONFIG = {
-  judge:     { name: '判断题', icon: '判', img: 'img/判断题.jpg', tileImg: 'img/判断题型.jpg', score: 5 },
-  single:    { name: '单选题', icon: '单', img: 'img/单选题.jpg', tileImg: 'img/单选题型.jpg', score: 10 },
-  multi:     { name: '多选题', icon: '多', img: 'img/多选题.jpg', tileImg: 'img/多选题型.jpg', score: 20 },
-  uncertain: { name: '不定项选择题', icon: '不', img: 'img/不定项选择题.jpg', tileImg: 'img/不定项题型.jpg', score: 30 }
+  judge:     { name: '判断题', icon: '判', img: 'img/判断题.png', tileImg: 'img/判断题型.jpg', score: 5 },
+  single:    { name: '单选题', icon: '单', img: 'img/单选题.png', tileImg: 'img/单选题型.jpg', score: 10 },
+  multi:     { name: '多选题', icon: '多', img: 'img/多选题.png', tileImg: 'img/多选题型.jpg', score: 20 },
+  uncertain: { name: '不定项选择题', icon: '不', img: 'img/不定向选择题.png', tileImg: 'img/不定项题型.jpg', score: 30 }
 };
 
 /* ============================================================
@@ -4051,10 +4012,7 @@ function renderTypeGrid(playTeamCardAnim) {
     return `
       <div class="type-card ${remain <= 0 ? 'disabled' : ''}" data-type="${type}" onclick="selectType('${type}')"${cardStyle}>
         <div class="type-info">
-          <div class="type-sigil">${cfg.icon}</div>
-          <div class="type-name">${cfg.name}</div>
-          <div class="type-score">${cfg.score}分</div>
-          <div class="type-remain">剩余 ${remain} 题</div>
+          <div class="type-remain" style="position: absolute; bottom: 20px;">剩余 ${remain} 题</div>
         </div>
       </div>
     `;
