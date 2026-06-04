@@ -1022,22 +1022,22 @@
       align-items: center;
       justify-content: center;
       border-radius: 24px;
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 119, 255, 0.05));
-      border: 1px solid rgba(0, 229, 255, 0.4);
-      color: #00e5ff;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--type-color, #00e5ff) 20%, transparent), rgba(0, 119, 255, 0.05));
+      border: 1px solid color-mix(in srgb, var(--type-color, #00e5ff) 40%, transparent);
+      color: var(--type-color, #00e5ff);
       font-size: 36px;
       font-weight: 900;
       margin-bottom: 24px;
-      box-shadow: 0 0 20px rgba(0, 229, 255, 0.15), inset 0 0 15px rgba(0, 229, 255, 0.2);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--type-color, #00e5ff) 15%, transparent), inset 0 0 15px color-mix(in srgb, var(--type-color, #00e5ff) 20%, transparent);
       transition: all 0.4s ease;
     }
 
     .type-card:hover .type-sigil {
       transform: scale(1.1) translateY(-4px);
-      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.3);
+      box-shadow: 0 10px 30px color-mix(in srgb, var(--type-color, #00e5ff) 40%, transparent), inset 0 0 20px color-mix(in srgb, var(--type-color, #00e5ff) 30%, transparent);
       color: #fff;
-      text-shadow: 0 0 12px rgba(0, 229, 255, 0.9);
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(0, 119, 255, 0.2));
+      text-shadow: 0 0 12px color-mix(in srgb, var(--type-color, #00e5ff) 90%, transparent);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--type-color, #00e5ff) 40%, transparent), color-mix(in srgb, var(--type-color, #00e5ff) 20%, transparent));
     }
 
     .type-card .type-name {
@@ -1052,30 +1052,30 @@
     .type-card .type-score {
       font-size: 64px;
       font-weight: 900;
-      background: linear-gradient(180deg, #ffffff, #00e5ff);
+      background: linear-gradient(180deg, #ffffff, var(--type-color, #00e5ff));
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       margin: 24px 0 16px 0;
-      filter: drop-shadow(0 4px 16px rgba(0, 229, 255, 0.4));
+      filter: drop-shadow(0 4px 16px color-mix(in srgb, var(--type-color, #00e5ff) 40%, transparent));
       line-height: 1;
     }
 
     .type-card .type-remain {
       font-size: 16px;
       font-weight: 700;
-      color: #b3e5fc;
-      background: rgba(0, 229, 255, 0.1);
+      color: color-mix(in srgb, var(--type-color, #00e5ff) 80%, #ffffff);
+      background: color-mix(in srgb, var(--type-color, #00e5ff) 10%, transparent);
       padding: 8px 20px;
       border-radius: 30px;
-      border: 1px solid rgba(0, 229, 255, 0.2);
+      border: 1px solid color-mix(in srgb, var(--type-color, #00e5ff) 20%, transparent);
       transition: all 0.3s ease;
     }
 
     .type-card:hover .type-remain {
-      background: rgba(0, 229, 255, 0.2);
+      background: color-mix(in srgb, var(--type-color, #00e5ff) 20%, transparent);
       color: #fff;
-      box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+      box-shadow: 0 0 15px color-mix(in srgb, var(--type-color, #00e5ff) 20%, transparent);
     }
 
     .type-card.disabled {
@@ -1104,35 +1104,39 @@
     }
     .tile-grid {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 0 12px;
+      height: 100%;
     }
     .tile {
       --tile-bg: none;
-      aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
+      border-radius: 14px;
       cursor: pointer;
       border: 2px solid rgba(0,229,255,0.38);
       background-color: transparent;
       background-image:
-        linear-gradient(145deg, rgba(6,16,48,0.62), rgba(4,10,32,0.72)),
+        linear-gradient(145deg, rgba(6,16,48,0.3), rgba(4,10,32,0.6)),
         var(--tile-bg);
       background-size: cover, cover;
       background-position: center, center;
       background-repeat: no-repeat;
       color: rgba(0,229,255,0.88);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
+      transform-style: preserve-3d;
+      perspective: 1000px;
     }
     .tile-num {
       position: relative;
       z-index: 2;
-      font-size: clamp(18px, min(3.2vw, 3.6vh), 28px);
+      font-size: clamp(24px, min(4.5vw, 5vh), 42px);
       font-weight: 900;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -1140,9 +1144,9 @@
       letter-spacing: -0.03em;
       text-shadow:
         0 0 2px rgba(0, 0, 0, 1),
-        0 1px 0 rgba(0, 0, 0, 0.92),
-        0 2px 6px rgba(0, 0, 0, 0.95),
-        0 0 14px rgba(0, 229, 255, 0.65);
+        0 2px 2px rgba(0, 0, 0, 0.92),
+        0 4px 10px rgba(0, 0, 0, 0.95),
+        0 0 16px rgba(0, 229, 255, 0.85);
     }
     .tile::before {
       content: '';
@@ -1195,7 +1199,7 @@
     .tile.selected {
       border-color: #b8ffff;
       background-image:
-        linear-gradient(145deg, rgba(0,229,255,0.38), rgba(41,121,255,0.36)),
+        linear-gradient(145deg, rgba(0,229,255,0.5), rgba(41,121,255,0.5)),
         var(--tile-bg);
       color: #fff;
       box-shadow:
@@ -1203,22 +1207,26 @@
         0 0 28px rgba(0,229,255,0.65),
         0 0 48px rgba(0,229,255,0.22),
         inset 0 0 0 1px rgba(200,255,255,0.45);
-      transform: scale(1.18) translateY(-3px);
-      z-index: 2;
-      animation: tilePulse 1.2s ease infinite;
+      transform: scale(1.22) translateY(-8px);
+      z-index: 10;
+      animation: tilePulse 1s ease infinite;
     }
     .tile.used {
-      opacity: 0.12;
+      opacity: 0.4;
+      filter: grayscale(1) brightness(0.6);
       background-image:
         linear-gradient(145deg, rgba(5,12,40,0.88), rgba(5,12,40,0.92)),
         var(--tile-bg);
-      border-color: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.1);
       color: rgba(255,255,255,0.15);
+      transform: rotateY(180deg) scale(0.96);
+      pointer-events: none;
     }
     .tile.used .tile-num {
       font-size: clamp(14px, min(2.4vw, 2.6vh), 20px);
-      color: rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.15);
       text-shadow: none;
+      transform: rotateY(-180deg);
     }
     .tile.highlight .tile-num,
     .tile.selected .tile-num {
@@ -1233,17 +1241,17 @@
     @keyframes tilePulse {
       0%, 100% {
         box-shadow:
-          0 0 0 2px rgba(0,229,255,0.65),
-          0 0 26px rgba(0,229,255,0.55),
-          0 0 44px rgba(0,229,255,0.2),
-          inset 0 0 0 1px rgba(200,255,255,0.4);
+          0 0 0 4px rgba(0,229,255,0.8),
+          0 0 40px rgba(0,229,255,0.6),
+          0 0 80px rgba(0,229,255,0.3),
+          inset 0 0 0 2px rgba(200,255,255,0.5);
       }
       50% {
         box-shadow:
-          0 0 0 2px rgba(0,255,255,0.85),
-          0 0 34px rgba(0,229,255,0.72),
-          0 0 56px rgba(0,229,255,0.28),
-          inset 0 0 0 1px rgba(220,255,255,0.55);
+          0 0 0 8px rgba(0,255,255,1),
+          0 0 60px rgba(0,229,255,0.9),
+          0 0 120px rgba(0,229,255,0.6),
+          inset 0 0 0 3px rgba(220,255,255,0.8);
       }
     }
 
@@ -2406,15 +2414,16 @@
     .tile-grid {
       flex: 1;
       min-height: 0;
-      gap: 9px;
+      gap: 12px;
       margin-bottom: 0;
       align-content: stretch;
+      padding: 0 10px;
     }
     .tile {
-      border-radius: 6px;
+      border-radius: 10px;
       border: 1px solid rgba(39,244,255,0.32);
       background-image:
-        linear-gradient(145deg, rgba(12, 27, 29, 0.72), rgba(4, 8, 9, 0.84)),
+        linear-gradient(145deg, rgba(12, 27, 29, 0.4), rgba(4, 8, 9, 0.7)),
         var(--tile-bg);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.035),
@@ -4005,14 +4014,23 @@ function renderTypeGrid(playTeamCardAnim) {
       : '';
   }
   const types = ['judge', 'single', 'multi', 'uncertain'];
+  const colors = {
+    judge: '#00e5ff',
+    single: '#d8b4fe',
+    multi: '#00e5ff',
+    uncertain: '#ffb74d'
+  };
   $('#typeGrid').innerHTML = types.map(type => {
     const cfg = TYPE_CONFIG[type];
     const remain = QUESTIONS[type].length - state.usedQuestions[type].size;
-    const cardStyle = cfg.img ? ` style="--type-card-art: url('${cfg.img}')"` : '';
+    const typeColor = colors[type];
+    const cardStyle = `style="--type-color: ${typeColor};${cfg.img ? ` --type-card-art: url('${cfg.img}')` : ''}"`;
     return `
       <div class="type-card ${remain <= 0 ? 'disabled' : ''}" data-type="${type}" onclick="selectType('${type}')"${cardStyle}>
         <div class="type-info">
-          <div class="type-remain" style="position: absolute; bottom: 20px;">剩余 ${remain} 题</div>
+          <div class="type-sigil">${cfg.icon}</div>
+          <div class="type-name">${cfg.name}</div>
+          <div class="type-score">${cfg.score}分</div>
         </div>
       </div>
     `;
@@ -4037,15 +4055,26 @@ function renderDrawPage() {
   state.drawSelectedTile = -1;
   const usedTiles = state.usedTiles[state.currentType];
   const cfg = TYPE_CONFIG[state.currentType];
-  const tileBg = cfg.tileImg;
+  // Use the full illustration image for the cards to make them stunning
+  const tileBg = cfg.img;
   const tileBgCss = tileBg ? `url('${tileBg}')` : 'none';
   const team = state.teams[state.currentTeamIdx];
   const titleEl = $('#drawStageTitle');
   const metaEl = $('#drawStageMeta');
   if (titleEl) titleEl.textContent = `${team ? team.name : '参赛队伍'} · ${cfg.name}`;
   if (metaEl) metaEl.textContent = `${cfg.score}分题库 · 剩余 ${QUESTIONS[state.currentType].length - state.usedQuestions[state.currentType].size} 题`;
+  
+  // Apply a dynamic glow to the header based on the card type
+  const stageHead = document.querySelector('.draw-stage-head');
+  if (stageHead) {
+    const tc = { judge: '#4fc3f7', single: '#81c784', multi: '#ffb74d', uncertain: '#ce93d8' }[state.currentType];
+    stageHead.style.borderBottom = `1px solid ${tc}60`;
+    stageHead.style.boxShadow = `0 8px 20px -10px ${tc}50`;
+  }
+
   let html = '';
-  for (let i = 1; i <= 50; i++) {
+  // Reduced to 25 cards for a 5x5 layout
+  for (let i = 1; i <= 25; i++) {
     const isUsed = usedTiles.has(i);
     html += `<div class="tile ${isUsed ? 'used' : ''}" id="tile-${i}" style="--tile-bg: ${tileBgCss}" ${isUsed ? '' : `onclick="selectTile(${i})"`}><span class="tile-num">${i}</span></div>`;
   }
