@@ -456,13 +456,11 @@
       btn.style.opacity = '0.8';
       btn.style.pointerEvents = 'none';
 
-      // Simulate a network request
       setTimeout(() => {
-        alert('验证成功！即将进入系统（可在此处对接后续跳转逻辑）');
-        btn.innerText = originalText;
-        btn.style.opacity = '1';
-        btn.style.pointerEvents = 'auto';
-      }, 800);
+        const urlParams = new URLSearchParams(window.location.search);
+        const room = urlParams.get('room') || '';
+        window.location.href = `index.html?mode=mobile&room=${encodeURIComponent(room)}&role=${data.role}&empId=${encodeURIComponent(data.empId||'')}&empName=${encodeURIComponent(data.empName||'')}&teamId=${encodeURIComponent(data.teamId||'')}`;
+      }, 300);
     }
   </script>
 </body>
