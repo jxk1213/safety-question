@@ -4744,10 +4744,12 @@ function broadcastHostState() {
 }
 
 function handleMobileAnswer(peerId, data) {
-  if (!state.currentQuestion || state.currentPage !== 'answer') return;
+  if (!state.currentQuestion) return;
   if (data.roundId !== state.roundId) return;
+  if (state.currentPage === 'result' && state.roundEndTime && (Date.now() - state.roundEndTime > 2000)) return;
   const selected = Array.isArray(data.selectedOptions) ? data.selectedOptions : [];
   const ok = checkAnswerByType(state.currentType, state.currentQuestion, selected);
+  let changed = false;
 
   if (data.role === 'audience') {
     const stats = state.mobileSync.audienceRoundStats;
@@ -4766,22 +4768,28 @@ function handleMobileAnswer(peerId, data) {
     }
     
     applyAudienceAutoResultToState();
-    renderAudienceAutoResultTag();
+    if (state.currentPage === 'answer') renderAudienceAutoResultTag();
+    changed = true;
   } else if (data.role === 'team' && data.teamName) {
     if (!state.mobileSync.teamAnswers) state.mobileSync.teamAnswers = {};
-    const teamIdx = state.teams.findIndex(t => t.teamName === data.teamName);
+    const cleanName = (n) => (n || '').replace(/队$/, '');
+    const teamIdx = state.teams.findIndex(t => cleanName(t.teamName) === cleanName(data.teamName));
     if (teamIdx !== -1) {
       if (teamIdx === state.currentTeamIdx) {
-        if (!state.isSubmitted) {
-          state.selectedOptions = selected;
-        }
+        state.selectedOptions = selected;
+        changed = true;
       } else {
         const tId = state.teams[teamIdx].id;
         if (state.mobileSync.teamAnswers[tId] === undefined) {
           state.mobileSync.teamAnswers[tId] = ok;
+          changed = true;
         }
       }
     }
+  }
+
+  if (changed && state.currentPage === 'result') {
+    renderResultPage();
   }
 }
 
@@ -5381,6 +5389,7 @@ function updateTimerUI() {
 function submitAnswer() {
   if (state.isSubmitted) return;
   state.isSubmitted = true;
+  state.roundEndTime = Date.now();
   clearInterval(state.timerInterval);
   $('#btnSubmit').disabled = true;
   $('#btnSubmit').textContent = '已提交';
