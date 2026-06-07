@@ -5321,6 +5321,7 @@ function renderAnswerPage() {
   tag.style.border = `1px solid ${tc}40`;
   $('#questionContent').textContent = q.q;
   state.selectedOptions = [];
+  state.mobileSync.teamAnswers = {};
   state.isSubmitted = false;
   $('#btnSubmit').disabled = false;
   $('#btnSubmit').textContent = '提交答案';
@@ -5383,9 +5384,9 @@ function submitAnswer() {
   clearInterval(state.timerInterval);
   $('#btnSubmit').disabled = true;
   $('#btnSubmit').textContent = '已提交';
-  showAnswerFeedback();
   broadcastHostState();
-  setTimeout(() => { renderResultPage(); showPage('result'); }, 1500);
+  renderResultPage(); 
+  showPage('result');
 }
 
 function showAnswerFeedback() {
@@ -5425,7 +5426,8 @@ function renderResultPage() {
   else if (type === 'judge') yourStr = state.selectedOptions[0] === 0 ? '正确' : '错误';
   else yourStr = state.selectedOptions.sort().map(i => String.fromCharCode(65 + i)).join('');
   const yourEl = $('#resultYourAnswer');
-  yourEl.textContent = `你的答案：${yourStr}`;
+  const teamName = state.currentTeamIdx === AUDIENCE_TEAM_ID ? '观众组' : state.teams[state.currentTeamIdx].name;
+  yourEl.textContent = `${teamName}的答案：${yourStr}`;
   yourEl.className = `result-your-answer ${isCorrect ? 'correct' : 'wrong'}`;
   state.otherTeamResults = {};
   if (state.mobileSync.teamAnswers) {

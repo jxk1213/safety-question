@@ -131,7 +131,17 @@ class Handler(SimpleHTTPRequestHandler):
         return self._json(400, {"ok": False, "error": "clientId required"})
       round_id = str(payload.get("roundId", ""))
       selected = payload.get("selectedOptions", [])
-      answer = {"clientId": client_id, "roundId": payload.get("roundId"), "selectedOptions": selected}
+      answer = {
+        "clientId": client_id,
+        "roundId": payload.get("roundId"),
+        "selectedOptions": selected,
+        "role": payload.get("role"),
+        "empId": payload.get("empId"),
+        "empName": payload.get("empName"),
+        "teamId": payload.get("teamId"),
+        "teamName": payload.get("teamName"),
+        "teamRegion": payload.get("teamRegion")
+      }
       with lock:
         room["clients_seen"][client_id] = time.time()
         bucket = room["answers"].setdefault(round_id, {})
