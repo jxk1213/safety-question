@@ -459,7 +459,7 @@
       setTimeout(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const room = urlParams.get('room') || '';
-        window.location.href = `index.html?mode=mobile&room=${encodeURIComponent(room)}&role=${data.role}&empId=${encodeURIComponent(data.empId||'')}&empName=${encodeURIComponent(data.empName||'')}&teamId=${encodeURIComponent(data.teamId||'')}`;
+        window.location.href = `index.html?mode=mobile&room=${encodeURIComponent(room)}&role=${data.role}&empId=${encodeURIComponent(data.empId||'')}&empName=${encodeURIComponent(data.empName||'')}&teamId=${encodeURIComponent(data.teamId||'')}&teamName=${encodeURIComponent(data.teamInfo ? data.teamInfo.name : '')}&teamRegion=${encodeURIComponent(data.teamInfo ? data.teamInfo.region : '')}`;
       }, 300);
     }
   </script>

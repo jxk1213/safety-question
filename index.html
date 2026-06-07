@@ -1413,22 +1413,11 @@
       backdrop-filter: blur(14px);
       border: 1px solid rgba(255,255,255,0.04);
       border-radius: 12px;
-      cursor: pointer;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       font-size: 16px;
       line-height: 1.6;
       position: relative;
       overflow: hidden;
-    }
-    .option-item:hover {
-      border-color: rgba(0,229,255,0.2);
-      background: rgba(0,229,255,0.05);
-      transform: translateX(4px);
-    }
-    .option-item.selected {
-      border-color: var(--accent-cyan);
-      background: rgba(0,229,255,0.08);
-      box-shadow: 0 0 24px rgba(0,229,255,0.08), inset 0 0 20px rgba(0,229,255,0.03);
     }
     .option-item.correct {
       border-color: var(--success);
@@ -1452,12 +1441,6 @@
       font-size: 14px;
       flex-shrink: 0;
       transition: all 0.3s ease;
-    }
-    .option-item.selected .option-marker {
-      border-color: var(--accent-cyan);
-      background: var(--accent-cyan);
-      color: var(--bg-primary);
-      box-shadow: 0 0 12px rgba(0,229,255,0.4);
     }
     .option-item.correct .option-marker {
       border-color: var(--success);
@@ -1993,11 +1976,6 @@
       transform: translate(-50%, -50%) scale(1);
       opacity: 1;
       transition: transform 0s, opacity 0s;
-    }
-    .option-item.selected::after {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 0.5;
-      background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, transparent 70%);
     }
 
     /* ===== Score Float Animation ===== */
@@ -2564,11 +2542,6 @@
       font-weight: 700;
       line-height: 1.45;
     }
-    .option-item:hover {
-      border-color: rgba(39,244,255,0.5);
-      background: rgba(39,244,255,0.08);
-      transform: translateY(-2px);
-    }
     .option-item .option-marker {
       width: 42px;
       height: 42px;
@@ -2577,16 +2550,6 @@
       color: #c9fbff;
       margin-right: 14px;
       font-size: 16px;
-    }
-    .option-item.selected {
-      border-color: var(--accent-lime);
-      background: rgba(141,255,130,0.1);
-      box-shadow: 0 0 28px rgba(141,255,130,0.12), inset 0 0 20px rgba(141,255,130,0.05);
-    }
-    .option-item.selected .option-marker {
-      background: var(--accent-lime);
-      border-color: var(--accent-lime);
-      color: #04100f;
     }
 
     .result-container {
@@ -4684,7 +4647,7 @@ const state = {
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
-const AUDIENCE_TEAM_ID = 8;
+const AUDIENCE_TEAM_ID = 999;
 
 function genRoomId() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -4703,6 +4666,7 @@ function checkAnswerByType(type, question, selectedOptions) {
 
 function resetAudienceRoundStats() {
   state.mobileSync.audienceRoundStats = { total: 0, correct: 0, answeredPeers: new Set() };
+  state.mobileSync.teamAnswers = {};
 }
 
 function getAudienceAutoResult() {
@@ -4782,25 +4746,43 @@ function broadcastHostState() {
 function handleMobileAnswer(peerId, data) {
   if (!state.currentQuestion || state.currentPage !== 'answer') return;
   if (data.roundId !== state.roundId) return;
-  const stats = state.mobileSync.audienceRoundStats;
-  if (stats.answeredPeers.has(peerId)) return;
   const selected = Array.isArray(data.selectedOptions) ? data.selectedOptions : [];
   const ok = checkAnswerByType(state.currentType, state.currentQuestion, selected);
-  stats.answeredPeers.add(peerId);
-  stats.total += 1;
-  if (ok) stats.correct += 1;
-  
-  if (data.role === 'audience' && data.empId) {
-    if (!state.audienceExportData) state.audienceExportData = {};
-    if (!state.audienceExportData[data.empId]) {
-      state.audienceExportData[data.empId] = { empName: data.empName, answeredCount: 0, correctCount: 0 };
+
+  if (data.role === 'audience') {
+    const stats = state.mobileSync.audienceRoundStats;
+    if (stats.answeredPeers.has(peerId)) return;
+    stats.answeredPeers.add(peerId);
+    stats.total += 1;
+    if (ok) stats.correct += 1;
+    
+    if (data.empId) {
+      if (!state.audienceExportData) state.audienceExportData = {};
+      if (!state.audienceExportData[data.empId]) {
+        state.audienceExportData[data.empId] = { empName: data.empName, answeredCount: 0, correctCount: 0 };
+      }
+      state.audienceExportData[data.empId].answeredCount++;
+      if (ok) state.audienceExportData[data.empId].correctCount++;
     }
-    state.audienceExportData[data.empId].answeredCount++;
-    if (ok) state.audienceExportData[data.empId].correctCount++;
+    
+    applyAudienceAutoResultToState();
+    renderAudienceAutoResultTag();
+  } else if (data.role === 'team' && data.teamName) {
+    if (!state.mobileSync.teamAnswers) state.mobileSync.teamAnswers = {};
+    const teamIdx = state.teams.findIndex(t => t.teamName === data.teamName);
+    if (teamIdx !== -1) {
+      if (teamIdx === state.currentTeamIdx) {
+        if (!state.isSubmitted) {
+          state.selectedOptions = selected;
+        }
+      } else {
+        const tId = state.teams[teamIdx].id;
+        if (state.mobileSync.teamAnswers[tId] === undefined) {
+          state.mobileSync.teamAnswers[tId] = ok;
+        }
+      }
+    }
   }
-  
-  applyAudienceAutoResultToState();
-  renderAudienceAutoResultTag();
 }
 
 function exportAudienceData() {
@@ -4901,7 +4883,10 @@ let mobileClientState = {
   lastOkAt: 0,
   role: PAGE_PARAMS.get('role') || 'audience',
   empId: PAGE_PARAMS.get('empId') || '',
-  empName: PAGE_PARAMS.get('empName') || ''
+  empName: PAGE_PARAMS.get('empName') || '',
+  teamId: PAGE_PARAMS.get('teamId') || '',
+  teamName: PAGE_PARAMS.get('teamName') || '',
+  teamRegion: PAGE_PARAMS.get('teamRegion') || ''
 };
 localStorage.setItem('audienceClientId', mobileClientState.clientId);
 
@@ -4940,7 +4925,10 @@ function mobileSubmitAnswer() {
         selectedOptions,
         role: mobileClientState.role,
         empId: mobileClientState.empId,
-        empName: mobileClientState.empName
+        empName: mobileClientState.empName,
+        teamId: mobileClientState.teamId,
+        teamName: mobileClientState.teamName,
+        teamRegion: mobileClientState.teamRegion
       })
     });
   } else if (mobileClientState.host && mobileClientState.host.open) {
@@ -4950,7 +4938,10 @@ function mobileSubmitAnswer() {
       selectedOptions,
       role: mobileClientState.role,
       empId: mobileClientState.empId,
-      empName: mobileClientState.empName
+      empName: mobileClientState.empName,
+      teamId: mobileClientState.teamId,
+      teamName: mobileClientState.teamName,
+      teamRegion: mobileClientState.teamRegion
     });
   } else {
     return;
@@ -5008,8 +4999,10 @@ function renderMobileQuestionCard() {
         </button>
       `).join('')}
     </div>
-    <div class="m-actions" style="display: none;">
-      <!-- 防误触：移动端移除手动提交按钮，统一在倒计时结束时自动提交 -->
+    <div class="m-actions">
+      <button class="m-submit" onclick="mobileSubmitAnswer()" ${submitted ? 'disabled' : ''}>
+        ${submitted ? '已提交' : '确认提交'}
+      </button>
     </div>
   `;
 }
@@ -5435,9 +5428,22 @@ function renderResultPage() {
   yourEl.textContent = `你的答案：${yourStr}`;
   yourEl.className = `result-your-answer ${isCorrect ? 'correct' : 'wrong'}`;
   state.otherTeamResults = {};
-  $('#otherTeamsGrid').innerHTML = state.teams.filter((_, i) => i !== state.currentTeamIdx).map(t =>
-    `<div class="other-team-item ot-unset" id="ot-${t.id}" onclick="toggleOtherTeam(${t.id})"><span class="ot-dot" style="background:${t.color}"></span><span class="ot-name">${t.name}</span><span class="ot-status">未设置</span></div>`
-  ).join('');
+  if (state.mobileSync.teamAnswers) {
+    Object.assign(state.otherTeamResults, state.mobileSync.teamAnswers);
+  }
+  
+  let otherTeamsHtml = state.teams.filter((_, i) => i !== state.currentTeamIdx).map(t => {
+    let statusClass = 'ot-unset', statusText = '未设置';
+    if (state.otherTeamResults[t.id] === true) { statusClass = 'ot-correct'; statusText = '回答正确'; }
+    else if (state.otherTeamResults[t.id] === false) { statusClass = 'ot-wrong'; statusText = '回答错误'; }
+    return `<div class="other-team-item ${statusClass}" id="ot-${t.id}" onclick="toggleOtherTeam(${t.id})"><span class="ot-dot" style="background:${t.color}"></span><span class="ot-name">${t.name}</span><span class="ot-status">${statusText}</span></div>`;
+  }).join('');
+  
+  if (state.currentTeamIdx !== AUDIENCE_TEAM_ID) {
+    otherTeamsHtml += `<div class="other-team-item ot-unset" id="ot-${AUDIENCE_TEAM_ID}" onclick="toggleOtherTeam(${AUDIENCE_TEAM_ID})"><span class="ot-dot" style="background:#2196F3"></span><span class="ot-name">观众组</span><span class="ot-status">未作答</span></div>`;
+  }
+  
+  $('#otherTeamsGrid').innerHTML = otherTeamsHtml;
   applyAudienceAutoResultToState();
   renderAudienceAutoResultTag();
   broadcastToMobiles({ type: 'audience_stats', payload: { total: state.mobileSync.audienceRoundStats.total, correct: state.mobileSync.audienceRoundStats.correct } });
@@ -5514,6 +5520,11 @@ function settleScore() {
   const others = state.teams.filter((_, i) => i !== state.currentTeamIdx);
   let oC = 0, oW = 0, oU = 0;
   others.forEach(t => { const r = state.otherTeamResults[t.id]; if (r === true) oC++; else if (r === false) oW++; else oU++; });
+  
+  if (state.currentTeamIdx !== AUDIENCE_TEAM_ID) {
+    const audR = state.otherTeamResults[AUDIENCE_TEAM_ID];
+    if (audR === true) oC++; else if (audR === false) oW++; else oU++;
+  }
   let sc, html;
   if (isCorrect) {
     const b = oW * 10; sc = base + b;
