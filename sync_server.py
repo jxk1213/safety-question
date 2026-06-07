@@ -2,7 +2,14 @@
 import json
 import threading
 import time
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+try:
+  from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+except ImportError:
+  from http.server import SimpleHTTPRequestHandler, HTTPServer
+  from socketserver import ThreadingMixIn
+
+  class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
 from urllib.parse import parse_qs, urlparse
 
 
