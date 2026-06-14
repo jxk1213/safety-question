@@ -29,7 +29,7 @@
       --sidebar-width: max(168px, calc(100vw / 6));
       /* 与首页 .team-grid 单列卡片一致：列宽 + 行高（主区留白与首页队伍区相同算法） */
       --team-grid-gap: clamp(8px, 1vw, 14px);
-      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - 8 * var(--team-grid-gap)) / 9);
+      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - 9 * var(--team-grid-gap)) / 10);
       /* 100vh − 主区上下 padding(40) − 标题区(~100) − 首页队伍网格上下 padding(18) − 额外余量以防被底部遮挡 */
       --home-team-card-height: calc(100vh - 180px);
       --glow-cyan: 0 0 20px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.05);
@@ -337,7 +337,7 @@
     /* ===== Team Selection Page (Slanted Frame Design) ===== */
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(9, 1fr);
+      grid-template-columns: repeat(10, 1fr);
       gap: 14px;
       max-width: 100%;
       width: 100%;
@@ -2040,7 +2040,7 @@
       --border-glow: rgba(39, 244, 255, 0.28);
       --sidebar-width: max(260px, calc(100vw / 5));
       --team-grid-gap: clamp(8px, 0.9vw, 16px);
-      --home-team-card-width: calc((100vw - var(--sidebar-width) - 74px - 7 * var(--team-grid-gap)) / 8);
+      --home-team-card-width: calc((100vw - var(--sidebar-width) - 74px - 9 * var(--team-grid-gap)) / 10);
       --home-team-card-height: calc(100vh - 198px);
       --arena-panel: rgba(8, 16, 18, 0.84);
       --arena-panel-strong: rgba(10, 23, 25, 0.94);
@@ -2995,7 +2995,7 @@
         <h1>AI申通 AI安全</h1>
         <div class="subtitle">安全生产月安全知识竞答</div>
         <div class="header-metrics">
-          <div class="header-chip"><b>9</b><span>省区战队</span></div>
+          <div class="header-chip"><b>10</b><span>省区战队</span></div>
           <div class="header-chip"><b>AI</b><span>安全竞赛</span></div>
           <div class="header-chip"><b>30s</b><span>限时作答</span></div>
         </div>
@@ -3333,7 +3333,8 @@ const TEAM_CONFIG = [
   { name: '浙江业务区', abbr: '浙', color: '#b39ddb', logo: '知识竞答分组/第1组/浙江业务区+浙江安全先锋队.png', teamName: '浙江安全先锋队' },
   { name: '湖北省区', abbr: '鄂', color: '#4dd0e1', logo: '知识竞答分组/第1组/湖北+楚安先锋队.png', teamName: '楚安先锋队' },
   { name: '湖南省区', abbr: '湘', color: '#a1887f', logo: '知识竞答分组/第1组/湖南+潇湘护卫队.png', teamName: '潇湘护卫队' },
-  { name: '福建业务区', abbr: '闽', color: '#90a4ae', logo: '知识竞答分组/第1组/福建业务区+福建平安先锋队.png', teamName: '福建平安先锋队' }
+  { name: '福建业务区', abbr: '闽', color: '#90a4ae', logo: '知识竞答分组/第1组/福建业务区+福建平安先锋队.png', teamName: '福建平安先锋队' },
+  { name: '广西省区', abbr: '桂', color: '#66bb6a', logo: '知识竞答分组/第1组/广西+八桂安全队.png', teamName: '八桂安全队' }
 ];
 
 const TYPE_CONFIG = {
