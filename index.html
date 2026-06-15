@@ -29,7 +29,7 @@
       --sidebar-width: max(168px, calc(100vw / 6));
       /* 与首页 .team-grid 单列卡片一致：列宽 + 行高（主区留白与首页队伍区相同算法） */
       --team-grid-gap: clamp(8px, 1vw, 14px);
-      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - 9 * var(--team-grid-gap)) / 10);
+      --home-team-card-width: calc((100vw - var(--sidebar-width) - 64px - (var(--team-count, 10) - 1) * var(--team-grid-gap)) / var(--team-count, 10));
       /* 100vh − 主区上下 padding(40) − 标题区(~100) − 首页队伍网格上下 padding(18) − 额外余量以防被底部遮挡 */
       --home-team-card-height: calc(100vh - 180px);
       --glow-cyan: 0 0 20px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.05);
@@ -337,7 +337,7 @@
     /* ===== Team Selection Page (Slanted Frame Design) ===== */
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      grid-template-columns: repeat(var(--team-count, 10), 1fr);
       gap: 14px;
       max-width: 100%;
       width: 100%;
@@ -2040,7 +2040,7 @@
       --border-glow: rgba(39, 244, 255, 0.28);
       --sidebar-width: max(260px, calc(100vw / 5));
       --team-grid-gap: clamp(8px, 0.9vw, 16px);
-      --home-team-card-width: calc((100vw - var(--sidebar-width) - 74px - 9 * var(--team-grid-gap)) / 10);
+      --home-team-card-width: calc((100vw - var(--sidebar-width) - 74px - (var(--team-count, 10) - 1) * var(--team-grid-gap)) / var(--team-count, 10));
       --home-team-card-height: calc(100vh - 198px);
       --arena-panel: rgba(8, 16, 18, 0.84);
       --arena-panel-strong: rgba(10, 23, 25, 0.94);
@@ -2995,7 +2995,7 @@
         <h1>AI申通 AI安全</h1>
         <div class="subtitle">安全生产月安全知识竞答</div>
         <div class="header-metrics">
-          <div class="header-chip"><b>10</b><span>省区战队</span></div>
+          <div class="header-chip"><b>9</b><span>省区战队</span></div>
           <div class="header-chip"><b>AI</b><span>安全竞赛</span></div>
           <div class="header-chip"><b>30s</b><span>限时作答</span></div>
         </div>
@@ -3327,7 +3327,7 @@ const PROVINCE_SVG = {
 const TEAM_CONFIG = [
   { name: '东北省区', abbr: '东', color: '#f06292', logo: '知识竞答分组/第1组/东北+东北安.png', teamName: '东北安队' },
   { name: '京津冀业务区', abbr: '京', color: '#ff8a65', logo: '知识竞答分组/第1组/京津冀业务区+京安队.png', teamName: '京安队' },
-  { name: '川藏省区', abbr: '川', color: '#ffd54f', logo: '知识竞答分组/第1组/川藏+食铁兽.png', teamName: '食铁兽队' },
+
   { name: '广州一级分拨', abbr: '粤', color: '#81c784', logo: '知识竞答分组/第1组/广州一级分拨+破穗先锋队.png', teamName: '破穗先锋队' },
   { name: '浙江省区', abbr: '浙', color: '#4fc3f7', logo: '知识竞答分组/第1组/浙江+浙里安全 2.0.png', teamName: '浙里安全 2.0' },
   { name: '浙江业务区', abbr: '浙', color: '#b39ddb', logo: '知识竞答分组/第1组/浙江业务区+浙江安全先锋队.png', teamName: '浙江安全先锋队' },
@@ -5179,6 +5179,15 @@ function renderTypeTeamCard(teamIdx, withEnterAnim) {
 
 function renderTeamGrid() {
   const grid = $('#teamGrid');
+  const n = state.teams.length || 1;
+  // 动态设置列数，让卡片始终铺满宽度
+  grid.style.setProperty('--team-count', n);
+  // 同时写到根节点，让 :root / 媒体查询中的 --home-team-card-width 也能感知队伍数
+  document.documentElement.style.setProperty('--team-count', n);
+  // 根据队伍数量自适应队名竖排文字高度和字号
+  const nameHeight = Math.max(60, Math.min(160, Math.round(160 * (10 / n))));
+  const nameFontSize = Math.max(12, Math.min(22, Math.round(22 * (10 / n))));
+  const logoSize = Math.max(60, Math.min(120, Math.round(120 * (10 / n))));
   grid.innerHTML = state.teams.map((t, i) => {
     const mapPath = PROVINCE_SVG[t.abbr] || '';
     return `
@@ -5187,14 +5196,14 @@ function renderTeamGrid() {
         <div class="team-card-frame-content">
           <div class="team-card-zone team-card-zone--name">
             <div class="team-card-header">
-              <div class="team-card-abbr" style="font-size: 16px;">${t.name}</div>
+              <div class="team-card-abbr" style="font-size: clamp(11px, ${16 * 10 / n}px, 20px);">${t.name}</div>
             </div>
           </div>
           <div class="team-card-zone team-card-zone--emblem">
-            <img src="${t.logo}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; max-width: 120px; max-height: 120px;" />
+            <img src="${t.logo}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%; max-width: ${logoSize}px; max-height: ${logoSize}px;" />
           </div>
           <div class="team-card-zone team-card-zone--flag" style="display: flex; align-items: center; justify-content: center;">
-            <div style="writing-mode: vertical-rl; text-orientation: upright; display: flex; justify-content: space-between; height: 160px; font-size: 22px; font-weight: bold; color: var(--text-primary); text-shadow: 0 0 10px rgba(0,229,255,0.5);">
+            <div style="writing-mode: vertical-rl; text-orientation: upright; display: flex; justify-content: space-between; height: ${nameHeight}px; font-size: ${nameFontSize}px; font-weight: bold; color: var(--text-primary); text-shadow: 0 0 10px rgba(0,229,255,0.5);">
               ${t.teamName.split('').map(c => `<span>${c}</span>`).join('')}
             </div>
           </div>
