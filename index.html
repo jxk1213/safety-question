@@ -5537,6 +5537,11 @@ function settleScore() {
     const audR = state.otherTeamResults[AUDIENCE_TEAM_ID];
     if (audR === true) oC++; else if (audR === false) oW++; else oU++;
   }
+
+  // 副答队伍分值配置（答对加分/答错扣分）
+  const SUB_SCORE = { judge: 2, single: 4, multi: 6, uncertain: 8 };
+  const subBase = SUB_SCORE[type] || 0;
+
   let sc, html;
   if (isCorrect) {
     const b = oW * 10; sc = base + b;
@@ -5558,6 +5563,18 @@ function settleScore() {
   previewEl.className = `result-score-change ${sc >= 0 ? 'score-positive' : 'score-negative'}`;
   animateScore(previewEl, 0, sc, 600);
   setTimeout(() => { previewEl.textContent = `本轮：${sc >= 0 ? '+' : ''}${sc}分`; }, 650);
+
+  // 副答队伍记分：对所有参与答题（已设置结果）的其他队伍按题型分值进行加减分
+  if (subBase > 0) {
+    state.teams.forEach((t, i) => {
+      if (i === state.currentTeamIdx) return; // 跳过主答队伍
+      const r = state.otherTeamResults[t.id];
+      if (r === undefined) return; // 未参与/未设置，不计分
+      const delta = r === true ? subBase : -subBase;
+      t.score += delta;
+    });
+  }
+
   $('#btnSettle').classList.add('hidden');
   $('#btnNext').classList.remove('hidden');
   animateRankingUpdate();
