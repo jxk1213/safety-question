@@ -3325,16 +3325,15 @@ const PROVINCE_SVG = {
 };
 
 const TEAM_CONFIG = [
-  { name: '东北省区', abbr: '东', color: '#f06292', logo: '知识竞答分组/第1组/东北+东北安.png', teamName: '东北安队' },
-  { name: '京津冀业务区', abbr: '京', color: '#ff8a65', logo: '知识竞答分组/第1组/京津冀业务区+京安队.png', teamName: '京安队' },
-
-  { name: '广州一级分拨', abbr: '粤', color: '#81c784', logo: '知识竞答分组/第1组/广州一级分拨+破穗先锋队.png', teamName: '破穗先锋队' },
-  { name: '浙江省区', abbr: '浙', color: '#4fc3f7', logo: '知识竞答分组/第1组/浙江+浙里安全 2.0.png', teamName: '浙里安全 2.0' },
-  { name: '浙江业务区', abbr: '浙', color: '#b39ddb', logo: '知识竞答分组/第1组/浙江业务区+浙江安全先锋队.png', teamName: '浙江安全先锋队' },
-  { name: '湖北省区', abbr: '鄂', color: '#4dd0e1', logo: '知识竞答分组/第1组/湖北+楚安先锋队.png', teamName: '楚安先锋队' },
-  { name: '湖南省区', abbr: '湘', color: '#a1887f', logo: '知识竞答分组/第1组/湖南+潇湘护卫队.png', teamName: '潇湘护卫队' },
-  { name: '福建业务区', abbr: '闽', color: '#90a4ae', logo: '知识竞答分组/第1组/福建业务区+福建平安先锋队.png', teamName: '福建平安先锋队' },
-  { name: '广西省区', abbr: '桂', color: '#66bb6a', logo: '知识竞答分组/第1组/广西+八桂安全队.png', teamName: '八桂安全队' }
+  { name: '上海业务区', abbr: '沪', color: '#f06292', logo: '知识竞答分组/第2组/上海业务区+沪安全先锋队.png', teamName: '沪安全先锋队' },
+  { name: '天津一级分拨', abbr: '津', color: '#ff8a65', logo: '知识竞答分组/第2组/天津一级分拨+津卫先锋.png', teamName: '津卫先锋' },
+  { name: '山东', abbr: '鲁', color: '#81c784', logo: '知识竞答分组/第2组/山东+山东泰山队.png', teamName: '山东泰山队' },
+  { name: '广东', abbr: '粤', color: '#4fc3f7', logo: '知识竞答分组/第2组/广东+粤安先锋.png', teamName: '粤安先锋' },
+  { name: '成都一级分拨', abbr: '川', color: '#b39ddb', logo: '知识竞答分组/第2组/成都一级分拨+蓉安先锋队.png', teamName: '蓉安先锋队' },
+  { name: '晋鲁蒙业务区', abbr: '晋', color: '#4dd0e1', logo: '知识竞答分组/第2组/晋鲁蒙业务区+泰山全安队.png', teamName: '泰山全安队' },
+  { name: '江西', abbr: '赣', color: '#a1887f', logo: '知识竞答分组/第2组/江西+赣好安全队.png', teamName: '赣好安全队' },
+  { name: '西北业务区', abbr: '西', color: '#90a4ae', logo: '知识竞答分组/第2组/西北业务区+西北安全护卫队.png', teamName: '西北安全护卫队' },
+  { name: '重庆', abbr: '渝', color: '#66bb6a', logo: '知识竞答分组/第2组/重庆+渝路同行.png', teamName: '渝路同行' }
 ];
 
 const TYPE_CONFIG = {
@@ -5350,7 +5349,7 @@ function renderAnswerPage() {
     ).join('');
   } else {
     list.innerHTML = q.options.map((text, i) =>
-      `<div class="option-item" onclick="toggleOption(${i})" id="opt-${i}"><div class="option-marker">${'ABCD'[i]}</div><span>${text}</span></div>`
+      `<div class="option-item" onclick="toggleOption(${i})" id="opt-${i}"><div class="option-marker">${String.fromCharCode(65+i)}</div><span>${text}</span></div>`
     ).join('');
   }
   resetTimer();
