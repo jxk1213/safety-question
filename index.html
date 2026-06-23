@@ -517,7 +517,7 @@
     #pageRanking .ranking-team-grid {
       flex: 1;
       min-height: 0;
-      grid-template-columns: repeat(9, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--team-count, 10), minmax(0, 1fr));
       /* 与首页 #pageTeamSelect .team-grid 相同间距 */
       gap: clamp(8px, 1vw, 14px);
       padding: 6px 0 12px;
@@ -2741,7 +2741,7 @@
     }
 
     #pageRanking .ranking-team-grid {
-      grid-template-columns: repeat(9, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--team-count, 10), minmax(0, 1fr));
     }
     #pageRanking .team-card-frame {
       clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
@@ -3864,6 +3864,9 @@ function renderRankingPage() {
   const grid = $('#rankingTeamGrid');
   if (!grid) return;
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
+  // 动态更新列数，确保所有队伍始终单行排列
+  document.documentElement.style.setProperty('--team-count', sorted.length);
+  grid.style.gridTemplateColumns = `repeat(${sorted.length}, minmax(0, 1fr))`;
   grid.innerHTML = sorted.map((t, rankIdx) => {
     const medalClass = rankIdx === 0 ? 'team-card-frame--gold' : rankIdx === 1 ? 'team-card-frame--silver' : rankIdx === 2 ? 'team-card-frame--bronze' : '';
     const mapPath = PROVINCE_SVG[t.abbr] || '';
