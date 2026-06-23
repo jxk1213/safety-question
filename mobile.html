@@ -16,6 +16,11 @@
       --border-color: rgba(0, 229, 255, 0.2);
     }
     
+    html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -28,11 +33,14 @@
       background-color: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
+      width: 100%;
+      max-width: 100vw;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       position: relative;
     }
 
@@ -361,7 +369,8 @@
       "2013": {"region": "武汉一级分拨", "name": "鄂安突击队"},
       "2014": {"region": "晋鲁蒙业务区", "name": "泰山全安队"},
       "2015": {"region": "京津冀业务区", "name": "京安队"},
-      "2016": {"region": "西南业务区", "name": "西南守安团"}
+      "2016": {"region": "西南业务区", "name": "西南守安团"},
+      "6334": {"region": "丹鸟", "name": "丹鸟速递"}
     };
 
     let currentRole = 'team'; // 'team' or 'audience'
