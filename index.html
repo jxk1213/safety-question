@@ -3299,11 +3299,25 @@ function getMobileEntryUrl(roomId) {
   return target.toString();
 }
 
+// 全局退避状态（429限流时短暂暂停）
+let _syncBackoffUntil = 0;
+
 async function syncFetchJson(url, options = {}) {
+  // 退避期内直接跳过，不发请求
+  if (Date.now() < _syncBackoffUntil) return null;
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 4000);
+  const timer = setTimeout(() => ctrl.abort(), 5000);
   try {
     const res = await fetch(url, { ...options, signal: ctrl.signal });
+    if (res.status === 429) {
+      // 被限流：退避 2 秒
+      _syncBackoffUntil = Date.now() + 2000;
+      return null;
+    }
+    if (res.status === 503) {
+      // 容量已满，返回原始 JSON 供调用方处理
+      try { return await res.json(); } catch { return null; }
+    }
     if (!res.ok) return null;
     return await res.json();
   } catch (e) {
@@ -3596,9 +3610,11 @@ function initDesktopMobileSync() {
   if (USE_HTTP_SYNC) {
     clearInterval(state.mobileSync.hostPushTimer);
     clearInterval(state.mobileSync.answerPullTimer);
+    // 大屏推送：每 1.5s 推一次（降低服务器压力，答题30s内不影响体验）
     state.mobileSync.hostPushTimer = setInterval(() => {
       broadcastHostState();
-    }, 700);
+    }, 1500);
+    // 大屏拉取答案：每 2s 一次
     state.mobileSync.answerPullTimer = setInterval(async () => {
       if (!state.mobileSync.roomId) return;
       const url = buildSyncUrl('/answers', { room: state.mobileSync.roomId, roundId: state.roundId });
@@ -3612,7 +3628,7 @@ function initDesktopMobileSync() {
       if (data && Array.isArray(data.clients)) {
         state.mobileSync.participants = new Set(data.clients);
       }
-    }, 900);
+    }, 2000);
     broadcastHostState();
   }
 }
@@ -3782,10 +3798,25 @@ function initMobileMode() {
     return;
   }
   if (USE_HTTP_SYNC) {
+    // 手机端拉取大屏状态：每 2s 一次（200人 × 0.5req/s = 100req/s，服务器可承受）
     state.mobileSync.mobilePollTimer = setInterval(async () => {
       const stateUrl = buildSyncUrl('/host_state', { room: MOBILE_ROOM_ID, clientId: mobileClientState.clientId });
       if (!stateUrl) return;
       const data = await syncFetchJson(stateUrl);
+
+      // 容量已满提示
+      if (data && data.capacity_exceeded) {
+        const c = $('#mQuestionCard');
+        if (c) c.innerHTML = `
+          <div class="m-tip" style="color:#ff6b6b;font-weight:bold;">
+            ⚠️ 观众组已满，无法加入答题。<br>
+            <span style="font-size:0.85em;font-weight:normal;color:#ccc;">如需参与请联系现场工作人员</span>
+          </div>`;
+        clearInterval(state.mobileSync.mobilePollTimer);
+        state.mobileSync.mobilePollTimer = null;
+        return;
+      }
+
       if (data && data.ok) {
         mobileClientState.lastOkAt = Date.now();
       }
@@ -3798,7 +3829,7 @@ function initMobileMode() {
           const tip = $('#mResultTip');
           if (tip) tip.textContent = '尚未提交本轮答案';
         }
-        
+
         // 倒计时结束，防误触机制：若还没提交过，则自动提交现有选项
         if (mobileClientState.payload.timeLeft <= 0 && mobileClientState.payload.page === 'answer' && mobileClientState.submittedRoundId !== mobileClientState.payload.roundId) {
           mobileSubmitAnswer();
@@ -3812,7 +3843,7 @@ function initMobileMode() {
       }
       renderMobileQuestionCard();
       updateMobileStatus();
-    }, 900);
+    }, 2000);
     renderMobileQuestionCard();
     updateMobileStatus();
     return;
