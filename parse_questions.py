@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 
-df = pd.read_excel('/Users/jixiaokang/Documents/申通文件/安全月/安全月活动页面（终版）/安全月知识竞赛初赛题库.xlsx', skiprows=1)
+df = pd.read_excel('/Users/jixiaokang/Documents/申通文件/安全月/安全月活动页面（终版）/安全月知识竞赛决赛题库.xlsx', skiprows=1)
 
 result = {
     'judge': [],
